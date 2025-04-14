@@ -69,11 +69,4 @@ Les contributions sont les bienvenues ! Si vous souhaitez contribuer à ce proje
 5. Push vers la branche (`git push origin feature/ajouter-fonctionnalite`)
 6. Ouvrez une Pull Request
 
-## Auteurs
 
-- EL JADI Soufiane eljadi.souf@gmail.com
-- Tasmim Web mahjoubweb
-
-## Licence
-
-Ce projet est sous licence [MIT](LICENSE).
