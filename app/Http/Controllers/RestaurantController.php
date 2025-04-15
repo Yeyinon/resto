@@ -159,4 +159,24 @@ class RestaurantController extends Controller
         toastr()->error('Le restaurant a été bien supprimé !', " ");
         return redirect()->route("Admin.restaurants");
     }
+    public function search(Request $request)
+{
+    $query = $request->input('query');
+    $location = $request->input('location');
+
+    $restaurants = Restaurant::query()
+        ->when($query, function ($q) use ($query) {
+            return $q->where('name', 'like', "%$query%");
+        })
+        ->when($location, function ($q) use ($location) {
+            return $q->where('location', 'like', "%$location%");
+        })
+        ->get();
+
+    return view('search_results', [
+        'restaurants' => $restaurants,
+        'nbr_resto' => $restaurants->count()
+    ]);
+}
+
 }

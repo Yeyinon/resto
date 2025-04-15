@@ -1,4 +1,6 @@
+@vite('ressources/css/app.css')
 @extends('master')
+
 @section('guest')
 <title>Resto - Découvrez & Réservez</title>
 	<!-- /header -->
@@ -10,39 +12,38 @@
 						<div class="col-xl-9 col-lg-10 col-md-8">
 							<h1>Découvrez &amp; Réservez</h1>
 							<p>le meilleur restaurant <span class="element" style="font-weight: 500"></span></p>
-							{{-- <form method="post" action="grid-listing-filterscol.html">
-								<div class="row g-0 custom-search-input">
-									<div class="col-lg-4">
-										<div class="form-group">
-											<input class="form-control" type="text" placeholder="What are you looking for...">
-											<i class="icon_search"></i>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="form-group">
-											<input class="form-control no_border_r" type="text" placeholder="Address, neighborhood...">
-											<i class="icon_pin_alt"></i>
-										</div>
-									</div>
-									<div class="col-lg-2">
-										<input type="submit" value="Search">
-									</div>
-								</div>
-								<!-- /row -->
-							</form> --}}
 						</div>
 					</div>
 					<!-- /row -->
 				</div>
 			</div>
 		</div>
-
-
+		<form method="GET" action="{{ route('client_login_form') }}">
+			@csrf
+                                <div class="row g-0 custom-search-input">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <input class="form-control" type="text" name="query"
+                                                placeholder="What are you looking for...">
+                                            <i class="icon_search"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <input class="form-control no_border_r" type="text" name="location"
+                                                placeholder="Address, neighborhood...">
+                                            <i class="icon_pin_alt"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <input type="submit" value="Search">
+                                    </div>
+                                </div>
+                            </form>
 		<div class="container margin_60_40">
 			<div class="main_title">
 				<span><em></em></span>
 				<h2>Restaurants populaires</h2>
-				{{-- <p>Cum doctus civibus efficiantur in imperdiet deterruisset.</p> --}}
 				<a href="{{ route('view_all') }}">View All</a>
 			</div>
 
@@ -60,16 +61,13 @@
 			                    <div class="item_title">
 			                        <h3>{{ $restaurant->name }}</h3>
 			                        <small>{{ $restaurant->location }}</small>
-			                        {{-- <small>{{ $restaurant->description }}</small> --}}
 			                    </div>
 			                </a>
                             
 			            </figure>
 			            <ul>
 			                <li><a class="loc_open" href="client/book/{{ $restaurant->id }}">Réservez ici</a></li>
-			                <li>
-			                    {{-- <div class="score"><span>Superb<em>350 Reviews</em></span><strong>8.9</strong></div> --}}
-			                </li>
+			                <li></li>
 			            </ul>
 			        </div>
 			    </div>
@@ -83,14 +81,12 @@
 						<small>Resto</small>
 						<h3>Plus de 100 restaurants</h3>
 						<p>Réservez une table facilement au meilleur prix</p>
-						{{-- <a href="grid-listing-filterscol.html" class="btn_1">View All</a> --}}
 					</div>
 				</div>
 				<!-- /wrapper -->
 			</div>
 			<!-- /banner -->
-
-
+		</div>
 
 		<div class="call_section lazy" data-bg="url(img/reservation-bg.jpg)">
 		    <div class="container clearfix">

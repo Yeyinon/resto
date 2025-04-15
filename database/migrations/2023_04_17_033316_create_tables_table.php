@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('tables', function (Blueprint $table) {
             $table->id();
             $table->integer('guest_number');
-            $table->string('number');
-            $table->string('status')->default('Disponible');
+            $table->string('number', 191);
+            $table->string('status', 191)->default('Disponible');
             $table->foreignId('restaurant_id')->references("id")->on("restaurants")->onDelete('cascade');
-            $table->string('location');
+            $table->string('location', 191);
             $table->timestamps();
             $table->unique(['number', 'restaurant_id']);
         });

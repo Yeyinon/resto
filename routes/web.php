@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TableController;
+use App\Http\Controllers\MenuController;
 use GuzzleHttp\Middleware;
 use App\Models\Restaurant;
 
@@ -32,6 +33,9 @@ Route::prefix('restaurant')->group(function () {
     Route::post('/connect', [RestaurantController::class, 'connect'])->name('restaurant.login');
     Route::get('/register', [RestaurantController::class, 'register'])->name('restaurant.register');
     Route::post('/create', [RestaurantController::class, 'create'])->name('restaurant.register.create');
+    Route::get('/search', [RestaurantController::class, 'search'])->name('search');
+    
+
     //middleware ROUTES
     Route::middleware(['Restaurant'])->group(function () {
 
@@ -39,6 +43,19 @@ Route::prefix('restaurant')->group(function () {
         Route::get('/dashboard', [RestaurantController::class, 'dashboard'])->name('restaurant.dashboard');
         Route::get('/profile', [RestaurantController::class, 'profile'])->name('restaurant.profile');
         Route::post('/update', [RestaurantController::class, 'update'])->name('restaurant.update.profile');
+        
+        //Menu
+        Route::resource('menus', MenuController::class)->names([
+            'index' => 'restaurant.menus.index',
+            'create' => 'restaurant.menus.create',
+            'store' => 'restaurant.menus.store',
+            'edit' => 'restaurant.menus.edit',
+            'update' => 'restaurant.menus.update',
+            'destroy' => 'restaurant.menus.destroy',
+            'show' => 'restaurant.menus.show',
+        ]);
+        
+        
         //manage Tables
         Route::get('/tables', [TableController::class, 'index'])->name('restaurant.tables');
         Route::get('/reservations', [ReservationController::class, 'reservation'])->name('restaurant.reservations');
@@ -46,6 +63,7 @@ Route::prefix('restaurant')->group(function () {
         Route::post('/store-table', [TableController::class, 'store'])->name('restaurant.table.store');
         Route::post('/update-table', [TableController::class, 'update'])->name('table.update');
         Route::post('/destroy-table', [TableController::class, 'destroy'])->name('table.delete');
+        
     });
 });
 
@@ -72,7 +90,7 @@ Route::prefix('client')->group(function () {
         Route::post('/reserve', [ClientController::class, 'reserve'])->name('client.reservation.create');
         Route::get('/reservations', [ClientController::class, 'reservations'])->name('client.reservations');
         Route::post('/destroy-reservation', [ReservationController::class, 'destroy'])->name('reservation.delete');
-
+        
 
         Route::get('/confirmed', function () {
             return view('client.confirm');
