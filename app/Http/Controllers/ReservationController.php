@@ -8,9 +8,57 @@ use App\Models\Client;
 use App\Models\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReservationStatusMail;
 
 class ReservationController extends Controller
 {
+    public function pending(Request $request)
+    {
+        $restaurant = Restaurant::find($request->id);
+        $reservations = Reservation::with('client', 'table')
+            ->where('status', 'pending') // Afficher uniquement les réservations en attente
+            ->whereHas('table', function ($query) use ($restaurant) {
+                $query->where('restaurant_id', $restaurant->id);
+            })
+            ->get();
+
+        return view('restaurant.reservations', compact('reservations', 'restaurant'));
+    }
+
+    /**
+     * Approuver une réservation.
+     */
+    public function approve(Request $request, $id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $reservation->status = 'approved'; // Changer le statut à approuvé
+        $reservation->save();
+
+        // Envoi de l'e-mail de confirmation au client
+        Mail::to($reservation->client->email)->send(new ReservationStatusMail($reservation, 'approved'));
+
+        toastr()->success('Réservation approuvée avec succès!', " ");
+        return redirect()->route('restaurant.reservations');
+    }
+
+    /**
+     * Refuser une réservation avec un motif.
+     */
+    public function reject(Request $request, $id)
+    {
+        $reservation = Reservation::findOrFail($id);
+        $reservation->status = 'rejected'; // Changer le statut à refusé
+        $reservation->rejection_reason = $request->input('reason'); // Ajouter le motif du refus
+        $reservation->save();
+
+        // Envoi de l'e-mail avec le motif de refus
+        Mail::to($reservation->client->email)->send(new ReservationStatusMail($reservation, 'rejected'));
+
+        toastr()->error('Réservation refusée avec succès!', " ");
+        return redirect()->route('restaurant.reservations');
+    }
+
     /**
      * Display a listing of the resource.
      */

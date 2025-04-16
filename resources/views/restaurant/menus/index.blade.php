@@ -9,7 +9,6 @@
             <button type="submit" class="btn-menu">
                 Ajouter un menu
             </button>
-
         </form>
     </div>
 
@@ -32,7 +31,7 @@
                                 <strong>{{ $plat->nom }}</strong> - {{ $plat->prix }}
                                 @if($plat->photo)
                                     <div class="mt-2">
-                                        <img src="{{ asset('storage/' . $plat->photo) }}" alt="{{ $plat->nom }}"
+                                        <img src="{{ asset('storage/' . $plat->photo) }}" alt="{{ $plat->nom }} "
                                             class="w-32 h-32 object-cover rounded-lg mx-auto">
                                     </div>
                                 @endif
@@ -41,12 +40,19 @@
                     </ul>
 
                     <div class="mt-4 flex justify-center space-x-2">
-                        <a href="{{ route('restaurant.menus.edit', $menu) }}" class="text-blue-600 hover:underline">Modifier</a>
+                        <!-- Bouton Modifier -->
+                        <form action="{{ route('restaurant.menus.edit', $menu) }}" method="GET">
+                            <button type="submit" class="btn-menu bg-blue-600 hover:bg-blue-700">
+                                Modifier
+                            </button>
+                        </form>
+
+                        <!-- Bouton Supprimer -->
                         <form action="{{ route('restaurant.menus.destroy', $menu) }}" method="POST"
                             onsubmit="return confirm('Supprimer ce menu ?');">
                             @csrf
                             @method('DELETE')
-                            <button class="text-red-600 hover:underline">Supprimer</button>
+                            <button class="btn-delete">Supprimer</button>
                         </form>
                     </div>
                 </div>

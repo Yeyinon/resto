@@ -635,3 +635,63 @@ body {
   margin-top: 2rem; /* Ajout d'espace en haut */
   color: #374151; /* Couleur du texte (gris foncé) */
 }
+
+/* Formulaire de la page modifier */
+/* Centrage du formulaire */
+.menu-form-wrapper {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Espacement entre les champs */
+.menu-form-wrapper .form-section {
+  margin-bottom: 1.5rem;
+}
+
+/* Bouton personnalisé */
+.btn-menu {
+  background-color: #4f46e5;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-menu:hover {
+  background-color: #4338ca;
+}
+
+/*Menus.index.blade.php */
+/* Style général pour les boutons */
+.btn-menu {
+  background-color: #4CAF50; /* Fond vert */
+  color: white; /* Texte blanc */
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-menu:hover {
+  background-color: #45a049; /* Fond vert plus foncé au survol */
+}
+
+/* Style spécifique pour le bouton "Supprimer" */
+.btn-delete {
+  background-color: #f44336; /* Fond rouge */
+  color: white; /* Texte blanc */
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-delete:hover {
+  background-color: #e53935; /* Fond rouge plus foncé au survol */
+}
