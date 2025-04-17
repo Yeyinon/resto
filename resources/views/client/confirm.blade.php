@@ -11,7 +11,7 @@
                         <div class="title">
                         {{-- <h3>{{ $restaurant->id }}</h3> --}}
                         {{-- {{ $restaurant->location }} --}}
-                    </div>
+                        </div>
                     </div>
                     <!-- /head -->
                     <div class="main">
@@ -27,7 +27,12 @@
                             <a href="/" class="home-icon"><i class="fas fa-arrow-circle-left"></i></a>
                             <h3>Réservation envoyée!</h3>
                             <p>votre réservation est en attente de confirmation </p>
-                            <div class="text-center dont-have"> <a href="{{ route('client.reservations') }}">En savoir plus</a></div><br>
+                            <div class="text-center dont-have">
+                                <a href="{{ route('client.reservations') }}">En savoir plus</a>
+                            </div><br>
+                            <div class="text-center">
+                            <a href="{{ route('client.menu', ['restaurant_id' => $restaurant->id]) }}" class="btn_1 full-width">Commander</a>
+                            </div>
                         </div>
                     </div>
                 </div>

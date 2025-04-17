@@ -9,12 +9,6 @@ class Table extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-
     protected $fillable = [
         'number',
         'location',
@@ -23,14 +17,15 @@ class Table extends Model
         'status'
     ];
 
+    // ✅ Relation correcte avec le restaurant
     public function restaurant()
     {
-        return $this->belongsTo(Restaurant::class,"restaurant_id");
+        return $this->belongsTo(Restaurant::class, 'restaurant_id');
     }
 
-
+    // ✅ Relation avec la réservation (si une table ne peut avoir qu'une seule réservation active)
     public function reservation()
     {
-        return $this->hasOne(Reservation::class);
+        return $this->hasMany(Reservation::class);
     }
 }

@@ -86,12 +86,12 @@ class MenuController extends Controller
             'new_plats.*.prix' => 'nullable|numeric',
             'new_plats.*.photo' => 'nullable|image|max:2048',
         ]);
-    
+
         // ✅ Mise à jour du nom du menu
         $menu->update([
             'nom' => $request->nom,
         ]);
-    
+
         // ✅ Mise à jour des plats existants
         if ($request->has('plats')) {
             foreach ($request->plats as $platData) {
@@ -102,28 +102,28 @@ class MenuController extends Controller
                             'nom' => $platData['nom'],
                             'prix' => $platData['prix'],
                         ];
-    
+
                         // 📷 Mise à jour de la photo si une nouvelle a été envoyée
                         if (isset($platData['photo']) && $platData['photo']) {
                             $data['photo'] = $platData['photo']->store('plat_images', 'public');
                         }
-    
+
                         $plat->update($data);
                     }
                 }
             }
         }
-    
+
         // ➕ Ajout de nouveaux plats
         if ($request->has('new_plats')) {
             foreach ($request->new_plats as $newPlat) {
                 if (!empty($newPlat['nom']) && !empty($newPlat['prix'])) {
                     $photoPath = null;
-    
+
                     if (isset($newPlat['photo']) && $newPlat['photo']) {
                         $photoPath = $newPlat['photo']->store('plat_images', 'public');
                     }
-    
+
                     $menu->plats()->create([
                         'nom' => $newPlat['nom'],
                         'prix' => $newPlat['prix'],
@@ -132,10 +132,10 @@ class MenuController extends Controller
                 }
             }
         }
-    
+
         return redirect()->route('restaurant.menus.index')->with('success', 'Menu mis à jour avec succès.');
     }
-    
+
 
     public function destroy(Menu $menu)
     {
@@ -157,6 +157,13 @@ class MenuController extends Controller
         $menu->delete();
 
         return redirect()->route('restaurant.menus.index')->with('success', 'Menu supprimé avec succès.');
+    }
+
+    // MenuController.php
+    public function clientIndex()
+    {
+        $menus = Menu::all();
+        return view('client.menu', compact('menus'));
     }
 
 }

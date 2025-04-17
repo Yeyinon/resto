@@ -17,24 +17,35 @@ class Reservation extends Model
 
     protected $fillable = [
 
-       'client_id',
-       'table_id',
-       'reservation_date',
-       'reservation_email',
-       'reservation_tele',
-       'reservation_time',
-   ];
+        'client_id',
+        'table_id',
+        'restaurant_id',
+        'reservation_date',
+        'reservation_email',
+        'reservation_tele',
+        'reservation_time',
+    ];
 
 
 
-    public function client(){
-        return $this->belongsTo(Client::class,'client_id',);
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'client_id', );
     }
 
 
-    public function table(){
-        return $this->belongsTo(Table::class,'table_id');
+    public function table()
+    {
+        return $this->belongsTo(Table::class, 'table_id');
     }
+
+
+
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
+
 
 
 }

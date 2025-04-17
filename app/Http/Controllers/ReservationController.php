@@ -138,4 +138,18 @@ class ReservationController extends Controller
         toastr()->error('La reservation a été bien supprimé !', " ");
         return redirect()->route("client.reservations");
     }
+
+    public function confirmation($id)
+    {
+        $reservation = Reservation::with('restaurant')->findOrFail($id);
+        $restaurant = $reservation->restaurant;
+
+        return view('client.confirm', compact('reservation', 'restaurant'));
+    }
+
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class); // Une réservation appartient à un restaurant
+    }
+
 }

@@ -14,6 +14,7 @@ use App\Models\Restaurant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationStatusMail;
+use App\Http\Controllers\CartController;
 
 
 /*
@@ -77,21 +78,21 @@ Route::prefix('restaurant')->group(function () {
                 'status' => 'required|in:approved,rejected',
                 'rejection_reason' => 'nullable|string|max:255',
             ]);
-        
+
             $reservation = Reservation::with('client')->findOrFail($id);
-        
+
             $reservation->status = $request->status;
             $reservation->rejection_reason = $request->status === 'rejected' ? $request->rejection_reason : null;
             $reservation->save();
-        
+
             $details = [
                 'clientName' => $reservation->client->name,
                 'status' => $reservation->status,
                 'rejection_reason' => $reservation->rejection_reason
             ];
-        
+
             Mail::to($reservation->client->email)->send(new ReservationStatusMail($details));
-        
+
             return response()->json(['message' => 'Statut mis à jour et email envoyé.']);
         });
     });
@@ -120,11 +121,19 @@ Route::prefix('client')->group(function () {
         Route::post('/reserve', [ClientController::class, 'reserve'])->name('client.reservation.create');
         Route::get('/reservations', [ClientController::class, 'reservations'])->name('client.reservations');
         Route::post('/destroy-reservation', [ReservationController::class, 'destroy'])->name('reservation.delete');
+        Route::get('/menu', [MenuController::class, 'clientIndex'])->name('client.menu');
+        // Afficher les menus du restaurant
+        Route::get('/client/menu/{restaurant_id}', [ClientController::class, 'showMenu'])->name('client.menu');
 
+        Route::get('/reservation/confirmation/{reservation}', [ReservationController::class, 'confirmation'])->name('client.reservation.confirmation');
 
-        Route::get('/confirmed', function () {
-            return view('client.confirm');
-        })->name('client.reservation.confirmed');
+        // 🛒 Routes du panier
+        Route::post('/cart/add', [CartController::class, 'add'])->name('client.cart.add');
+        Route::get('/cart', [CartController::class, 'view'])->name('client.cart.view');
+        Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('client.cart.checkout');
+        Route::get('/panier', [CartController::class, 'show'])->name('client.cart.show');
+        
+
     });
 });
 /*-----------------------------End Client routes-------------------------------- */
@@ -172,14 +181,14 @@ Route::get('/restaurants', function () {
 
 
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 require __DIR__ . '/auth.php';

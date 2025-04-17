@@ -66,11 +66,11 @@ class RestaurantController extends Controller
 
         $restaurant = Auth::guard('restaurant')->user();
         $tables = Table::all();
-//reservation number
+        //reservation number
         $reservationCount = Reservation::whereHas('table', function ($query) use ($restaurant) {
             $query->where('restaurant_id', $restaurant->id);
         })->count();
-//table number
+        //table number
         $tableCount = Table::whereHas('restaurant', function ($query) use ($restaurant) {
             $query->where('restaurant_id', $restaurant->id);
         })->count();
@@ -82,9 +82,9 @@ class RestaurantController extends Controller
         $latestReservation = Reservation::whereHas('table', function ($query) use ($restaurant) {
             $query->where('restaurant_id', $restaurant->id);
         })->latest()->first();
-// return $restaurant->lastReservation;
+        // return $restaurant->lastReservation;
 
-        return view('restaurant.dashboard', compact('restaurant', 'reservationCount', 'tableCount', 'reservations', 'chartLabels', 'chartData', 'tables','latestReservation'));
+        return view('restaurant.dashboard', compact('restaurant', 'reservationCount', 'tableCount', 'reservations', 'chartLabels', 'chartData', 'tables', 'latestReservation'));
     }
 
 
@@ -160,23 +160,45 @@ class RestaurantController extends Controller
         return redirect()->route("Admin.restaurants");
     }
     public function search(Request $request)
-{
-    $query = $request->input('query');
-    $location = $request->input('location');
+    {
+        $query = $request->input('query');
+        $location = $request->input('location');
 
-    $restaurants = Restaurant::query()
-        ->when($query, function ($q) use ($query) {
-            return $q->where('name', 'like', "%$query%");
-        })
-        ->when($location, function ($q) use ($location) {
-            return $q->where('location', 'like', "%$location%");
-        })
-        ->get();
+        $restaurants = Restaurant::query()
+            ->when($query, function ($q) use ($query) {
+                return $q->where('name', 'like', "%$query%");
+            })
+            ->when($location, function ($q) use ($location) {
+                return $q->where('location', 'like', "%$location%");
+            })
+            ->get();
 
-    return view('search_results', [
-        'restaurants' => $restaurants,
-        'nbr_resto' => $restaurants->count()
-    ]);
-}
+        return view('search_results', [
+            'restaurants' => $restaurants,
+            'nbr_resto' => $restaurants->count()
+        ]);
+    }
+
+    public function confirmation($id)
+    {
+        // Récupérer la réservation et le restaurant associé
+        $reservation = Reservation::with('restaurant')->findOrFail($id);
+
+        // Récupérer le restaurant directement
+        $restaurant = $reservation->restaurant;
+
+        // Retourner la vue avec les données
+        return view('client.confirm', compact('reservation', 'restaurant'));
+    }
+
+    public function showMenu($id)
+    {
+        // Trouver le restaurant par son identifiant
+        $restaurant = Restaurant::findOrFail($id);
+
+        // Passer cette variable à la vue
+        return view('restaurant.menu', compact('restaurant'));
+    }
+
 
 }

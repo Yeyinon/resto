@@ -28,7 +28,7 @@ class ClientController extends Controller
         // return $tableCount;
         // $restaurant = $restaurant->tables->where('status',"=",'Disponible')->groupBy('guest_number');
 // return $restaurant;
-        return view('client.reservation', ['restaurant' => $restaurant],compact('tableCount','comments'));
+        return view('client.reservation', ['restaurant' => $restaurant], compact('tableCount', 'comments'));
     }
 
     public function reservations(Request $request)
@@ -40,36 +40,43 @@ class ClientController extends Controller
 
     public function reserve(Request $request)
     {
-        $table = Table::findOrFail($request->table_id);
-        // $table->status = 'Indisponible';
-        $existingReservation = Reservation::where('table_id', $table->id)
-        ->where('reservation_date', $request->reservation_date)
-        ->where('reservation_time', $request->reservation_time)
-        ->first();
+        $table = Table::with('restaurant')->findOrFail($request->table_id);
 
-    if ($existingReservation) {
-        // Table is already reserved on the requested date, handle the error
-        return redirect()->back()->with('error', 'La table est déjà réservée à cette date et heure.');
-    }
-        $table->save();
-        // $client = Client::findOrFail($request->client_id);
+        $existingReservation = Reservation::where('table_id', $table->id)
+            ->where('reservation_date', $request->reservation_date)
+            ->where('reservation_time', $request->reservation_time)
+            ->first();
+
+        if ($existingReservation) {
+            return redirect()->back()->with('error', 'La table est déjà réservée à cette date et heure.');
+        }
+
         $client = Client::findOrFail($request->client_id);
-        $restaurant = Restaurant::findOrFail($request->restaurant_id);
-        $client->yums = Auth::guard('client')->user()->yums + $restaurant->yums;
+
+        // 🔥 On récupère automatiquement le restaurant associé à la table
+        $restaurant = $table->restaurant;
+
+        // Ajout des yums
+        $client->yums += $restaurant->yums;
         $client->save();
 
+        // 💡 Création de la réservation AVEC le restaurant récupéré automatiquement
         $reservation = Reservation::create([
-            'client_id' => $request->client_id,
-            'table_id' => $request->table_id,
+            'client_id' => $client->id,
+            'table_id' => $table->id,
             'reservation_tele' => $request->reservation_tele,
             'reservation_email' => $request->reservation_email,
             'reservation_date' => $request->reservation_date,
             'reservation_time' => $request->reservation_time,
-            'created_at' => Carbon::now(),
+            'restaurant_id' => $restaurant->id, // Auto
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        $restaurant = Restaurant::find($request->restaurant_id);
-        return redirect()->route('client.reservation.confirmed')->with(['restaurant' => $restaurant]);
+
+        return redirect()->route('client.reservation.confirmation', ['reservation' => $reservation->id]);
     }
+
+
     public function clients()
     {
         $clients = Client::all();
@@ -98,7 +105,7 @@ class ClientController extends Controller
         //dd($request->all());
         $check = $request->all();
         if (Auth::guard('client')->attempt(['email' => $check['email'], 'password' => $check['password']])) {
-            toastr()->success('Connectez-vous avec succès');
+            toastr()->success('Connexion reussie');
             return redirect()->route('view_all');
         } else {
             toastr()->error('Email ou mot de passe invalide');
@@ -146,4 +153,30 @@ class ClientController extends Controller
         toastr()->info('Se déconnecter avec succès');
         return redirect('/');
     }
+
+
+    public function showMenu($restaurant_id)
+    {
+        $restaurant = Restaurant::findOrFail($restaurant_id);
+    
+        // Charger les menus avec les plats
+        $menus = $restaurant->menus()->with('plats')->get();
+    
+        return view('client.menu', compact('restaurant', 'menus'));
+    }
+    
+
+
+
+
+    public function addToCart($id)
+    {
+        $menu = Menu::findOrFail($id);
+        // Ajouter au panier, par exemple avec la session
+        session()->push('cart', $menu);
+
+        return redirect()->route('client.cart');
+    }
+
+
 }
