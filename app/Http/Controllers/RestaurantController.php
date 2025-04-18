@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 // use Carbon\Carbon;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Validator;
 
 
 class RestaurantController extends Controller
@@ -120,8 +121,30 @@ class RestaurantController extends Controller
 
     public function create(Request $request)
     {
-
-        // dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'description' => 'required|string',
+            'email' => 'required|string|email|max:255|unique:restaurants,email',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'name.required' => 'Le nom est requis.',
+            'location.required' => 'La localisation est requise.',
+            'description.required' => 'La description est requise.',
+            'email.required' => 'L\'adresse email est requise.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'password.required' => 'Le mot de passe est requis.',
+            'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+        ]);
+    
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+    
         $restaurant = Restaurant::create([
             'name' => $request->name,
             'location' => $request->location,
@@ -130,9 +153,10 @@ class RestaurantController extends Controller
             'password' => Hash::make($request->password),
             'created_at' => Carbon::now(),
         ]);
+    
         Auth::guard("restaurant")->login($restaurant);
-
-        toastr()->success('Données enregistrées avec succès');
+    
+        toastr()->success('Inscription réussie.');
         return redirect()->route("restaurant.dashboard");
     }
 

@@ -10,6 +10,7 @@ use App\Models\Client;
 use App\Models\Table;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
@@ -116,19 +117,40 @@ class ClientController extends Controller
     {
         return view('client.register');
     }
+
     public function create(Request $request)
     {
-        // dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:clients,email',
+            'password' => 'required|string|min:6',
+        ], [
+            'name.required' => 'Le nom est requis.',
+            'email.required' => 'L\'adresse email est requise.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'password.required' => 'Le mot de passe est requis.',
+            'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+        ]);
+    
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+    
         $client = Client::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'created_at' => Carbon::now(),
         ]);
+    
         Auth::guard("client")->login($client);
-        toastr()->success('Données enregistrées avec succès');
+        toastr()->success('Inscription réussie.');
         return redirect()->route('view_all');
     }
+
     public function update(Request $request)
     {
 
@@ -158,13 +180,13 @@ class ClientController extends Controller
     public function showMenu($restaurant_id)
     {
         $restaurant = Restaurant::findOrFail($restaurant_id);
-    
+
         // Charger les menus avec les plats
         $menus = $restaurant->menus()->with('plats')->get();
-    
+
         return view('client.menu', compact('restaurant', 'menus'));
     }
-    
+
 
 
 
