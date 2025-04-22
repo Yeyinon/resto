@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationStatusMail;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 
 /*
@@ -127,12 +128,15 @@ Route::prefix('client')->group(function () {
 
         Route::get('/reservation/confirmation/{reservation}', [ReservationController::class, 'confirmation'])->name('client.reservation.confirmation');
 
+        Route::get('/mon-panier', [CartController::class, 'show'])->name('client.cart.show');
+
         // 🛒 Routes du panier
         Route::post('/cart/add', [CartController::class, 'add'])->name('client.cart.add');
         Route::get('/cart', [CartController::class, 'view'])->name('client.cart.view');
-        Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('client.cart.checkout');
-        Route::get('/panier', [CartController::class, 'show'])->name('client.cart.show');
-        
+        Route::post('/payment/fedapay', [PaymentController::class, 'pay'])->name('fedapay.pay');
+        Route::get('/payment/fedapay/success', [PaymentController::class, 'success'])->name('fedapay.success');
+        Route::post('/payment/fedapay/callback', [PaymentController::class, 'callback'])->name('fedapay.callback');
+
 
     });
 });

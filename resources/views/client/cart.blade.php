@@ -27,9 +27,39 @@
             </div>
         @endforeach
 
-        <div class="text-end">
-            <h3>Total général : {{ $total }} XOF</h3>
-            <a href="{{ route('client.cart.checkout') }}" class="btn btn-success mt-3">Passer à la commande</a>
+        @php
+            $serviceFee = $total * 0.1;
+            $grandTotal = $total + $serviceFee;
+        @endphp
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3>Total général : {{ number_format($total, 0, ',', ' ') }} XOF</h3>
+                <ais de service (10%) : {{ number_format($serviceFee, 0, ',', ' ') }} XOF</p>
+                <h4>Total à payer : {{ number_format($grandTotal, 0, ',', ' ') }} XOF</h4>
+
+                <form action="{{ route('fedapay.pay') }}" method="POST" class="mt-4">
+                    @csrf
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <input type="text" name="firstname" class="form-control" placeholder="Prénom" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="lastname" class="form-control" placeholder="Nom" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="email" name="email" class="form-control" placeholder="Email" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="phone" class="form-control" placeholder="Téléphone (ex: 97000000)" required>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="amount" value="{{ $grandTotal }}">
+
+                    <button type="submit" class="btn btn-success">Payer avec FedaPay</button>
+                </form>
+            </div>
         </div>
     @else
         <div class="alert alert-info">

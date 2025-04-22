@@ -64,7 +64,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Offre yums ( 100 yums = 1$ de rabais )</label>
+                                        <label>Offre yums ( 100 yums = 1000XOF de rabais )</label>
                                         <input type="number" class="form-control" name="yums"
                                             value="{{ Auth::guard('restaurant')->user()->yums }}">
                                     </div>
