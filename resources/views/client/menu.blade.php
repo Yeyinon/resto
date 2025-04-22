@@ -26,8 +26,6 @@
                                             <input type="number" name="quantity" value="1" min="1" class="form-control"
                                                 style="width: 70px; display: inline-block;">
                                             <button type="submit" class="btn btn-primary">Ajouter au panier</button>
-                                            <a href="{{ route('client.cart.show') }}" class="btn btn-success mb-3">Voir mon
-                                                panier</a>
                                         </form>
 
 
@@ -41,5 +39,9 @@
                 </div>
             </div>
         @endforeach
+
+        <div class="text-center my-4">
+            <a href="{{ route('client.cart.show') }}" class="btn btn-success">Voir mon panier</a>
+        </div>
     </div>
 @endsection

@@ -191,4 +191,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/confidentialite', function () {
+    return view('confidentialite');
+})->name('confidentialite');
+
 require __DIR__ . '/auth.php';

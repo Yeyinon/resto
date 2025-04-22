@@ -160,17 +160,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /row -->
-                            {{-- <h6>I am not a robot</h6>
-                            <div class="row add_bottom_25">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <input type="text" id="verify_register" class="form-control"
-                                            placeholder="Human verify: 3 + 1 =?">
-                                    </div>
-                                </div>
-                            </div> --}}
-                            <!-- /row -->
+                            <!-- Checkbox pour la politique de confidentialité -->
+                        <div class="form-group form-check mt-3">
+                            <input type="checkbox" class="form-check-input" id="privacyCheck" name="privacy_agreed" required>
+                            <label class="form-check-label" for="privacyCheck">
+                                Lu et approuvé la <a href="{{ route('confidentialite') }}" target="_blank" class="text-primary">clause de confidentialité</a>.
+                            </label>
+                        </div>
                             <div class="text-center dont-have">Vous avez déjà un compte ? <a href="{{ route('login_form') }}">Connexion</a></div><br>
 
                             <div class="form-group text-center"><input type="submit" class="btn_1" value="Submit"

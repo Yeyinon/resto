@@ -127,6 +127,7 @@ class RestaurantController extends Controller
             'description' => 'required|string',
             'email' => 'required|string|email|max:255|unique:restaurants,email',
             'password' => 'required|string|min:6|confirmed',
+            'privacy_agreed' => 'accepted', // validation Laravel
         ], [
             'name.required' => 'Le nom est requis.',
             'location.required' => 'La localisation est requise.',
@@ -152,7 +153,10 @@ class RestaurantController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'created_at' => Carbon::now(),
+            'privacy_agreed' => true, // on stocke le consentement
         ]);
+
+        $restaurant->privacy_agreed = $request->has('privacy_agreed');
     
         Auth::guard("restaurant")->login($restaurant);
     

@@ -201,9 +201,9 @@
                     <h3 data-bs-target="#collapse_3">Contacts</h3>
                     <div class="collapse dont-collapse-sm contacts" id="collapse_3">
                         <ul>
-                            <li><i class="icon_house_alt"></i>Fquih Ben Salah<br>MOROCCO</li>
-                            <li><i class="icon_mobile"></i>+212 642 912 362</li>
-                            <li><i class="icon_mail_alt"></i><a href="#0">Resto@mail.com</a></li>
+                            <li><i class="icon_house_alt"></i>Axel&Bryan<br>Benin</li>
+                            <li><i class="icon_mobile"></i>+2290140750121</li>
+                            <li><i class="icon_mail_alt"></i><a href="#0">restorant.application@gmail.com</a></li>
                         </ul>
                     </div>
                 </div>
@@ -227,7 +227,7 @@
                             </ul>
                         </div> --}}
                         <div class="follow_us"><br>
-                            <h5>© 2023 RESTO - TOUS LES DROITS SONT RÉSERVÉS</h5>
+                            <h5>© 2025 RESTO - TOUS LES DROITS SONT RÉSERVÉS</h5>
 
                         </div>
                     </div>
