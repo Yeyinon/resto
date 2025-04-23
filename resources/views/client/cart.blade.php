@@ -29,7 +29,7 @@
         @endforeach
 
         @php
-            $serviceFee = $total * 0.1;
+            $serviceFee = $total * 0.02;
             $grandTotal = $total + $serviceFee;
         @endphp
 

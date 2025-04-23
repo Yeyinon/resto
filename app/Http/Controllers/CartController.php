@@ -65,7 +65,7 @@ class CartController extends Controller
             $subtotal += $menu['prix'];
         }
 
-        $fee = $subtotal * 0.1;
+        $fee = $subtotal * 0.02;
         $total = $subtotal + $fee;
 
         $customerData = [
