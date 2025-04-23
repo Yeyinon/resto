@@ -34,10 +34,10 @@ Ce projet est une application web de réservation de tables en ligne pour les re
 ## Installation
 
 1. Clonez le dépôt GitHub :
-```git clone https://github.com/soufianeljadi/restaurant-project ```
+```git clone https://github.com/soufianeljadi/resto ```
 
 2. Accédez au répertoire du projet :
-```cd restaurant-project```
+```cd resto```
 
 3. Installez les dépendances PHP via Composer :
 ```composer install```
@@ -58,15 +58,5 @@ Ce projet est une application web de réservation de tables en ligne pour les re
 
 9. Accédez au site web dans votre navigateur à l'adresse `http://localhost:8000`.
 
-## Contribution
-
-Les contributions sont les bienvenues ! Si vous souhaitez contribuer à ce projet, veuillez suivre les étapes suivantes :
-
-1. Fork du dépôt
-2. Créez une nouvelle branche (`git checkout -b feature/ajouter-fonctionnalite`)
-3. Effectuez vos modifications
-4. Committez vos changements (`git commit -am 'Ajouter une fonctionnalité'`)
-5. Push vers la branche (`git push origin feature/ajouter-fonctionnalite`)
-6. Ouvrez une Pull Request
 
 
