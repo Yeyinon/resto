@@ -123,6 +123,10 @@ Route::prefix('client')->group(function () {
         Route::get('/reservations', [ClientController::class, 'reservations'])->name('client.reservations');
         Route::post('/destroy-reservation', [ReservationController::class, 'destroy'])->name('reservation.delete');
         Route::get('/menu', [MenuController::class, 'clientIndex'])->name('client.menu');
+        Route::post('/reservation/{id}/cancel', [ClientController::class, 'requestCancellation'])
+            ->name('reservation.cancel');
+
+
         // Afficher les menus du restaurant
         Route::get('/client/menu/{restaurant_id}', [ClientController::class, 'showMenu'])->name('client.menu');
 

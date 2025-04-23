@@ -11,6 +11,9 @@ use App\Models\Table;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ReservationCancelledByClient;
+use App\Models\Menu;
 
 class ClientController extends Controller
 {
@@ -132,20 +135,20 @@ class ClientController extends Controller
             'password.required' => 'Le mot de passe est requis.',
             'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
         ]);
-    
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-    
+
         $client = Client::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'created_at' => Carbon::now(),
         ]);
-    
+
         Auth::guard("client")->login($client);
         toastr()->success('Inscription réussie.');
         return redirect()->route('view_all');
@@ -199,6 +202,45 @@ class ClientController extends Controller
 
         return redirect()->route('client.cart');
     }
+
+    public function requestCancellation(Request $request)
+    {
+        $reservation = Reservation::with('restaurant')->findOrFail($request->reservation_id);
+
+        // Vérifie que la réservation appartient au client connecté
+        if ($reservation->client_id !== auth()->guard('client')->id()) {
+            return back()->with('error', 'Accès non autorisé.');
+        }
+
+        // Débogage pour vérifier les valeurs avant de tenter de les parser
+        \Log::debug('Reservation Date: ' . $reservation->reservation_date);
+        \Log::debug('Reservation Time: ' . $reservation->reservation_time);
+
+
+        // Vérifie que la date et l'heure existent
+        if (empty($reservation->reservation_date) || empty($reservation->reservation_time)) {
+            return back()->with('error', 'Date ou heure de réservation manquante.');
+        }
+
+        $reservationDate = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+        $now = now();
+
+        $hoursBeforeReservation = $now->diffInHours($reservationDate, false);
+
+        if ($hoursBeforeReservation < 48) {
+            return back()->with('error', 'Votre délai pour annuler la réservation est dépassé. Vous pouvez annuler 48h avant la réservation.');
+        }
+
+        // Notification au restaurant
+        Notification::route('mail', $reservation->restaurant->email)
+            ->notify(new ReservationCancelledByClient($reservation));
+
+        $reservation->delete();
+        $reservation->save();
+
+        return redirect()->route('client.reservations')->with('success', 'Votre réservation a été annulée avec succès. Le restaurant a été notifié.');
+    }
+
 
 
 }

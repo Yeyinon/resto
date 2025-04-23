@@ -64,10 +64,10 @@ return $request;
         toastr()->info('Se déconnecter avec succès');
         return redirect('/');
     }
-    // public function register()
-    // {
-    //     return view('admin.register');
-    // }
+     public function register()
+    {
+        return view('admin.admin_register');
+     }
 
     public function create(Request $request)
     {

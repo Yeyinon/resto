@@ -278,7 +278,7 @@
     <script src="{{ asset('assets-home/js/typed.min.js') }}"></script>
     <script>
         var typed = new Typed('.element', {
-            strings: ["au meilleur prix", "avec une nourriture unique", "avec un bel emplacement"],
+            strings: ["au meilleur mes reservations", "avec une nourriture unique", "avec un bel emplacement"],
             startDelay: 10,
             loop: true,
             backDelay: 2000,
