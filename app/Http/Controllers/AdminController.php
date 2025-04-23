@@ -51,7 +51,7 @@ return $request;
         //dd($request->all());
         $check = $request->all();
         if (Auth::guard('admin')->attempt(['email' => $check['email'], 'password' => $check['password']])) {
-            toastr()->success('Connectez-vous avec succès');
+            toastr()->success('Connexion reussie');
             return redirect()->route('admin.dashboard');
         } else {
             return back()->with('error', 'Email ou mot de passe invalide');
@@ -61,7 +61,7 @@ return $request;
     public function logout()
     {
         Auth::guard('admin')->logout();
-        toastr()->info('Se déconnecter avec succès');
+        toastr()->info('Déconnexion reussie');
         return redirect('/');
     }
      public function register()

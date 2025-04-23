@@ -1,6 +1,7 @@
 @extends('restaurant.master')
 <link rel="stylesheet" href="{{ asset('css/style.min.css') }}">
 
+<title>Resto- Mon Menu</title>
 <div class="container mx-auto p-6 text-center">
     <h2 class="menu-title">Menus</h2>
 

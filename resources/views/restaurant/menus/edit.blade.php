@@ -35,7 +35,7 @@
 
 </style>
 
-
+<title>Resto- Modifier Menu</title>
 <div class="container mx-auto p-6">
     <div class="menu-form-wrapper bg-white shadow-lg rounded-lg">
         <h2 class="text-2xl font-bold mb-6 text-center">Modifier le Menu : {{ $menu->nom }}</h2>

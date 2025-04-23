@@ -1,6 +1,7 @@
 @extends('client.master')
 
 @section('client')
+<title>Resto - Mon Panier</title>
 <div class="container py-4">
     <h1 class="mb-4">🛒 Mon panier</h1>
 

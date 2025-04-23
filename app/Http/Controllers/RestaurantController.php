@@ -95,7 +95,7 @@ class RestaurantController extends Controller
         //dd($request->all());
         $check = $request->all();
         if (Auth::guard('restaurant')->attempt(['email' => $check['email'], 'password' => $check['password']])) {
-            toastr()->success('Connectez-vous avec succès');
+            toastr()->success('Connexion reussie');
             return redirect()->route('restaurant.dashboard');
         } else {
             toastr()->error('Email ou mot de passe invalide');
@@ -106,7 +106,7 @@ class RestaurantController extends Controller
     public function logout()
     {
         Auth::guard('restaurant')->logout();
-        toastr()->info('Se déconnecter avec succès');
+        toastr()->info('Déconnexion reussie');
         return redirect('/');
     }
     public function register()

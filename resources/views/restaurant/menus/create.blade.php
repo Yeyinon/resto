@@ -30,7 +30,7 @@
 
 </style>
 
-
+<title>Resto- Créer Menu</title>
 <div class="form-wrapper">
     <div class="form-container">
         <h2 class="form-title">Créer un nouveau menu</h2>

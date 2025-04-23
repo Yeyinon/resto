@@ -1,6 +1,7 @@
 @extends('client.master')
 
 @section('client')
+<title>Resto- Confidentialité</title>
 <div class="container py-5">
     <div class="bg-white shadow rounded p-4 md:p-6">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Clause de Confidentialité – Resto.com</h1>

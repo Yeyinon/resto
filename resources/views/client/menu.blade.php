@@ -1,6 +1,7 @@
 @extends('client.master')
 
 @section('client')
+<title>Resto - Menu</title>
     <div class="container">
         <h1>Menu du restaurant {{ $restaurant->name }}</h1>
 

@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('guest')
-    <title>Search Results</title>
+    <title>Resto- Résultats</title>
     <main>
         <div class="container">
             <h1>Search Results</h1>

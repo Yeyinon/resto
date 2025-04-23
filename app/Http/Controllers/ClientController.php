@@ -175,7 +175,7 @@ class ClientController extends Controller
     public function logout()
     {
         Auth::guard('client')->logout();
-        toastr()->info('Se déconnecter avec succès');
+        toastr()->info('Déconnexion reussie');
         return redirect('/');
     }
 
