@@ -42,16 +42,23 @@ class ReservationCancelledByClient extends Notification
      * Obtenez la représentation de l'email de la notification.
      */
     public function toMail($notifiable)
-{
-    // Vérifie si reservation_date est déjà un objet Carbon, sinon on le transforme
-    $formattedDate = Carbon::parse($this->reservation->reservation_date)->format('d/m/Y à H:i');
+    {
+        // Vérifie si reservation_date est déjà un objet Carbon, sinon on le transforme
+        $formattedDate = Carbon::parse($this->reservation->reservation_date)->format('d/m/Y à H:i');
 
-    return (new MailMessage)
-        ->subject('Une réservation a été annulée')
-        ->line("Le client {$this->reservation->client->name} a annulé sa réservation prévue le {$formattedDate}.")
-        ->line('Merci de mettre à jour vos disponibilités.')
-        ->action('Voir la réservation', route('reservation.cancel', ['id' => $this->reservation->id]));  // Assurez-vous que la route est correctement appelée
-}
+        return (new MailMessage)
+            ->subject('Votre réservation a été annulée')
+            ->line("Bonjour {$this->reservation->client->name},")
+            ->line("Nous vous informons que votre réservation prévue le <strong>{$formattedDate}</strong> a été annulée.")
+            ->line('Nous vous prions de bien vouloir en prendre connaissance et mettre à jour vos disponibilités.')
+            ->line('Merci de votre compréhension et à bientôt !')
+
+            ->view('emails.reservation-cancelled', [
+                'reservation' => $this->reservation,
+                'formattedDate' => $formattedDate,
+            ]);
+    }
+
 
 
 

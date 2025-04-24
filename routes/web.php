@@ -203,4 +203,7 @@ Route::get('/confidentialite', function () {
     return view('confidentialite');
 })->name('confidentialite');
 
+Route::post('/webhook/fedapay', [App\Http\Controllers\WebhookController::class, 'handle']);
+
+
 require __DIR__ . '/auth.php';

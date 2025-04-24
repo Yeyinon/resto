@@ -47,15 +47,21 @@ class ReservationController extends Controller
      */
     public function reject(Request $request, $id)
     {
+        // Récupère la réservation
         $reservation = Reservation::findOrFail($id);
-        $reservation->status = 'rejected'; // Changer le statut à refusé
-        $reservation->rejection_reason = $request->input('reason'); // Ajouter le motif du refus
+
+        // Modifie le statut de la réservation et ajoute le motif de refus
+        $reservation->status = 'rejected';
+        $reservation->rejection_reason = $request->input('reason');
         $reservation->save();
 
-        // Envoi de l'e-mail avec le motif de refus
+        // Envoi de l'email avec le motif de refus
         Mail::to($reservation->client->email)->send(new ReservationStatusMail($reservation, 'rejected'));
 
+        // Notification via toastr
         toastr()->error('Réservation refusée avec succès!', " ");
+
+        // Redirection
         return redirect()->route('restaurant.reservations');
     }
 
@@ -130,7 +136,7 @@ class ReservationController extends Controller
 
         $restaurant = Restaurant::findOrFail($request->restaurant_id);
         $client = Client::findOrFail($request->client_id);
-        $client->yums = $client->yums - $restaurant->yums ;
+        $client->yums = $client->yums - $restaurant->yums;
         $client->save();
 
         $reservation = Reservation::findOrFail($request->id);
@@ -151,5 +157,7 @@ class ReservationController extends Controller
     {
         return $this->belongsTo(Restaurant::class); // Une réservation appartient à un restaurant
     }
+
+
 
 }

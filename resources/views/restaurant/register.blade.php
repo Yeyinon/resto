@@ -22,7 +22,7 @@
                 <div class="main_title center">
                     <span><em></em></span>
                     <h2>Pourquoi soumettre à Resto</h2>
-                    <p>Cum doctus civibus efficiantur in imperdiet deterruisset.</p>
+                    <p>Que les saveurs authentiques ravivent vos plus beaux souvenirs.</p>
                 </div>
 
                 <div class="row justify-content-center align-items-center add_bottom_15">

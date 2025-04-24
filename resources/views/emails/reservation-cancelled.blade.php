@@ -70,11 +70,7 @@
             margin: 20px 0;
         }
 
-        .badge-approved {
-            background-color: #2ecc71;
-        }
-
-        .badge-rejected {
+        .badge-cancelled {
             background-color: #e74c3c;
         }
     </style>
@@ -84,25 +80,19 @@
     <div class="container">
         <div class="header">
         <img src="https://i.postimg.cc/J0GydpJR/resto.png" alt="Logo Mon Resto" style="height: 60px; margin-bottom: 10px;">
-            <h1>Confirmation de réservation</h1>
+            <h1>Réservation Annulée</h1>
         </div>
 
         <div class="content">
-            <h2>Bonjour {{ $reservation->client->name ?? 'Cher client' }},</h2>
+            <h2>Bonjour {{ $reservation->table->restaurant->name ?? 'Cher restaurateur' }},</h2>
 
-            @if($status == 'approved')
-                <p>Nous avons le plaisir de vous confirmer que votre réservation pour le <strong>{{ $reservation->reservation_date }} à {{ $reservation->reservation_time }}</strong> a été acceptée !</p>
+            <p>Nous vous informons que la réservation du client <strong>{{ $reservation->client->name }}</strong> prévue le <strong>{{ $formattedDate }}</strong> a été annulée.</p>
 
-                <div class="badge badge-approved">Réservation Confirmée ✅</div>
-            @else
-                <p>Nous sommes désolés de vous informer que votre réservation prévue le <strong>{{ $reservation->reservation_date }} à {{ $reservation->reservation_time }}</strong> a été refusée.</p>
+            <div class="badge badge-cancelled">Réservation Annulée ❌</div>
 
-                <div class="badge badge-rejected">Réservation Refusée ❌</div>
+            <p>Merci de mettre à jour vos disponibilités en conséquence.</p>
 
-                <p><strong>Motif du refus :</strong><br>{{ $reason }}</p>
-            @endif
-
-            <p>Merci de votre confiance, et à très bientôt chez <strong>{{ $reservation->table->restaurant->name }}</strong> !</p>
+            <p>Merci et à bientôt chez <strong>{{ $reservation->table->restaurant->name }}</strong> !</p>
         </div>
 
         <div class="footer">

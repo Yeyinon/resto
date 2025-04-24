@@ -235,8 +235,8 @@ class ClientController extends Controller
         Notification::route('mail', $reservation->restaurant->email)
             ->notify(new ReservationCancelledByClient($reservation));
 
+        // Supprime la réservation
         $reservation->delete();
-        $reservation->save();
 
         return redirect()->route('client.reservations')->with('success', 'Votre réservation a été annulée avec succès. Le restaurant a été notifié.');
     }
