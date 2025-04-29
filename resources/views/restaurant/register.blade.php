@@ -1,6 +1,6 @@
 @extends('master')
 @section('guest')
-<title>Resto - Attirez de nouveaux clients</title>
+    <title>Resto - Attirez de nouveaux clients</title>
 
     <main>
         <div class="hero_single version_3">
@@ -41,15 +41,15 @@
                         </div>
                     </div>
                     <div class="col-lg-5 pl-lg-5 text-center d-none d-lg-block">
-                        <img src="{{ asset('assets-home/img/about_1.svg') }}" alt="" class="img-fluid"
-                            width="250" height="250">
+                        <img src="{{ asset('assets-home/img/about_1.svg') }}" alt="" class="img-fluid" width="250"
+                            height="250">
                     </div>
                 </div>
                 <!-- /row -->
                 <div class="row justify-content-center align-items-center add_bottom_15">
                     <div class="col-lg-5 pr-lg-5 text-center d-none d-lg-block">
-                        <img src="{{ asset('assets-home/img/about_2.svg') }}" alt="" class="img-fluid"
-                            width="250" height="250">
+                        <img src="{{ asset('assets-home/img/about_2.svg') }}" alt="" class="img-fluid" width="250"
+                            height="250">
                     </div>
                     <div class="col-lg-5">
                         <div class="box_about">
@@ -74,8 +74,8 @@
 
                     </div>
                     <div class="col-lg-5 pl-lg-5 text-center d-none d-lg-block">
-                        <img src="{{ asset('assets-home/img/about_3.svg') }}" alt="" class="img-fluid"
-                            width="250" height="250">
+                        <img src="{{ asset('assets-home/img/about_3.svg') }}" alt="" class="img-fluid" width="250"
+                            height="250">
                     </div>
                 </div>
                 <!-- /row -->
@@ -98,14 +98,14 @@
                         </div>
                         <div id="message-register"></div>
                         @if ($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <form method="post" action="{{ route('restaurant.register.create') }}">
                             @csrf
                             <h6>Données personnelles</h6>
@@ -126,6 +126,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row add_bottom_15">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" placeholder="Numéro de téléphone du resto(Mobile Money)"
+                                            name="phone_number" required>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row add_bottom_15">
                                 <div class="col-lg-12">
                                     <div class="form-group">
@@ -161,13 +170,16 @@
                                 </div>
                             </div>
                             <!-- Checkbox pour la politique de confidentialité -->
-                        <div class="form-group form-check mt-3">
-                            <input type="checkbox" class="form-check-input" id="privacyCheck" name="privacy_agreed" required>
-                            <label class="form-check-label" for="privacyCheck">
-                                Lu et approuvé la <a href="{{ route('confidentialite') }}" target="_blank" class="text-primary">clause de confidentialité</a>.
-                            </label>
-                        </div>
-                            <div class="text-center dont-have">Vous avez déjà un compte ? <a href="{{ route('login_form') }}">Connexion</a></div><br>
+                            <div class="form-group form-check mt-3">
+                                <input type="checkbox" class="form-check-input" id="privacyCheck" name="privacy_agreed"
+                                    required>
+                                <label class="form-check-label" for="privacyCheck">
+                                    Lu et approuvé la <a href="{{ route('confidentialite') }}" target="_blank"
+                                        class="text-primary">clause de confidentialité</a>.
+                                </label>
+                            </div>
+                            <div class="text-center dont-have">Vous avez déjà un compte ? <a
+                                    href="{{ route('login_form') }}">Connexion</a></div><br>
 
                             <div class="form-group text-center"><input type="submit" class="btn_1" value="Submit"
                                     id="submit-register"></div>

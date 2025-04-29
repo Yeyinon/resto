@@ -158,6 +158,46 @@ class ReservationController extends Controller
         return $this->belongsTo(Restaurant::class); // Une réservation appartient à un restaurant
     }
 
+    public function checkTableAvailability(Request $request)
+{
+    $date = $request->query('date');
+    $time = $request->query('time');
 
+    $reservedTables = Reservation::where('date', $date)
+        ->where('time', $time)
+        ->pluck('table_id')
+        ->toArray();
+
+    return response()->json(['reservedTables' => $reservedTables]);
+}
+
+public function showAvailableTables(Request $request)
+{
+    $restaurantId = $request->query('restaurant_id');
+    $date = $request->query('date');
+    $time = $request->query('time');
+
+    // Validation basique
+    if (!$restaurantId || !$date || !$time) {
+        return response()->json(['error' => 'Paramètres manquants'], 400);
+    }
+
+    // On récupère toutes les tables disponibles du restaurant
+    $tables = Table::where('restaurant_id', $restaurantId)
+        ->where('status', 'Disponible')
+        ->get();
+
+    // On vérifie les tables déjà réservées à cette date et heure
+    $reservedTableIds = Reservation::where('restaurant_id', $restaurantId)
+        ->where('reservation_date', $date)
+        ->where('reservation_time', $time)
+        ->pluck('table_id')
+        ->toArray();
+
+    return response()->json([
+        'tables' => $tables,
+        'reservées' => $reservedTableIds
+    ]);
+}
 
 }

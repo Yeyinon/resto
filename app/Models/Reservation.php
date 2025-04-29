@@ -18,12 +18,13 @@ class Reservation extends Model
     protected $fillable = [
 
         'client_id',
-        'table_id',
         'restaurant_id',
+        'table_id',
         'reservation_date',
+        'reservation_time',
         'reservation_email',
         'reservation_tele',
-        'reservation_time',
+        'status'
     ];
 
 

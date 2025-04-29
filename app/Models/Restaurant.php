@@ -24,7 +24,8 @@ class Restaurant extends Authenticatable
         'description',
         'email',
         'password',
-        'yums'
+        'yums',
+        'phone_number',
     ];
     public function tables()
     {

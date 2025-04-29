@@ -141,7 +141,7 @@
                                 <div id="DatePicker"></div>
 
                                 <div class="dropdown time">
-                                    <a href="#" data-bs-toggle="dropdown">Heure <span id="selected_time"></span></a>
+                                    <a href="javascript:void(0)" data-bs-toggle="dropdown">Heure <span id="selected_time"></span></a>
                                     <div class="dropdown-menu">
                                         <div class="dropdown-menu-content">
                                             <h4>Déjeuner</h4>
@@ -265,7 +265,7 @@
                                         <div class="dropdown-menu-content">
                                             <h4>Combien de personnes?</h4>
                                             <div class="radio_select">
-                                                <ul>
+                                                <ul id="table-options">
                                                     {{-- @foreach ($restaurant->tables->where('status', '=', 'Disponible')->groupBy('guest_number') as $table)
                                                         @if ($table->count() > 1)
                                                             <p>{{ $table[0]->guest_number }} </p>
@@ -440,4 +440,111 @@
             $('#DatePicker').datepicker('setDate', $(this).val());
         });
     </script>
+<script>
+$(document).ready(function() {
+    // Fonction pour vérifier les tables disponibles
+    function checkTableAvailability() {
+        const selectedDate = $('input[name="reservation_date"]').val();
+        const selectedTime = $('input[name="reservation_time"]:checked').val();
+        
+        // Vérifier si date et heure sont sélectionnées
+        if (selectedDate && selectedTime) {
+            // Faire une requête AJAX pour obtenir les tables déjà réservées
+            $.ajax({
+                url: '/check-table-availability',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    restaurant_id: '{{ $restaurant->id }}',
+                    reservation_date: selectedDate,
+                    reservation_time: selectedTime
+                },
+                success: function(response) {
+                    // Réinitialiser l'apparence de toutes les tables
+                    $('.radio_select ul li label').removeClass('table-available table-reserved');
+                    
+                    if (response.reservedTables && response.reservedTables.length > 0) {
+                        // Marquer les tables réservées en rouge
+                        response.reservedTables.forEach(function(tableId) {
+                            $('input[name="table_id"][value="' + tableId + '"]')
+                                .closest('li')
+                                .find('label')
+                                .addClass('table-reserved');
+                        });
+                        
+                        // Marquer les autres tables en vert (disponibles)
+                        $('input[name="table_id"]').each(function() {
+                            if (!response.reservedTables.includes(parseInt($(this).val()))) {
+                                $(this).closest('li').find('label').addClass('table-available');
+                            }
+                        });
+                    } else {
+                        // Si aucune table n'est réservée, toutes sont disponibles
+                        $('.radio_select ul li label').addClass('table-available');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erreur lors de la vérification des tables:', xhr.responseText);
+                }
+            });
+        }
+    }
+    
+    // Déclencher la vérification lorsque la date ou l'heure change
+    $('input[name="reservation_date"]').on('change', checkTableAvailability);
+    $('input[name="reservation_time"]').on('change', checkTableAvailability);
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.querySelector('input[name="reservation_date"]');
+    const timeRadios = document.querySelectorAll('input[name="reservation_time"]');
+    const tableOptionsContainer = document.getElementById('table-options');
+
+    function fetchTables() {
+        const date = dateInput.value;
+        const timeRadio = document.querySelector('input[name="reservation_time"]:checked');
+        const time = timeRadio ? timeRadio.value : null;
+        const restaurantId = "{{ $restaurant->id }}";
+
+        if (!date || !time) return;
+
+        fetch(`/tables/disponibles?restaurant_id=${restaurantId}&date=${date}&time=${time}`)
+            .then(response => response.json())
+            .then(data => {
+                const tables = data.tables;
+                const reserved = data.reservées;
+                tableOptionsContainer.innerHTML = ''; // reset
+
+                tables.forEach(table => {
+                    if (!reserved.includes(table.id)) {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}">
+                            <label for="table_${table.id}">
+                                ${table.guest_number} personnes <em>${table.location}</em>
+                            </label>
+                        `;
+                        tableOptionsContainer.appendChild(li);
+                    }
+                });
+
+                if (tableOptionsContainer.innerHTML === '') {
+                    tableOptionsContainer.innerHTML = '<li><em>Aucune table disponible à cette heure.</em></li>';
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des tables :", error);
+            });
+    }
+
+    dateInput.addEventListener("change", fetchTables);
+    timeRadios.forEach(radio => {
+        radio.addEventListener("change", fetchTables);
+    });
+});
+</script>
+
+
 @endsection

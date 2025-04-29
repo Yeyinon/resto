@@ -128,6 +128,7 @@ class RestaurantController extends Controller
             'email' => 'required|string|email|max:255|unique:restaurants,email',
             'password' => 'required|string|min:6|confirmed',
             'privacy_agreed' => 'accepted', // validation Laravel
+            'phone_number' => 'required|regex:/^[0-9]+$/',
         ], [
             'name.required' => 'Le nom est requis.',
             'location.required' => 'La localisation est requise.',
@@ -138,6 +139,7 @@ class RestaurantController extends Controller
             'password.required' => 'Le mot de passe est requis.',
             'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'phone_number.regex'=>'Le Numéro de téléphone dois être une suite de chiffre'
         ]);
     
         if ($validator->fails()) {
@@ -152,6 +154,7 @@ class RestaurantController extends Controller
             'description' => $request->description,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone_number' => $request->phone_number,
             'created_at' => Carbon::now(),
             'privacy_agreed' => true, // on stocke le consentement
         ]);
