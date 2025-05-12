@@ -6,12 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Foogra - Discover & Book the best restaurants at the best price">
     <meta name="author" content="Ansonika">
-    {{-- <title>Resto - Découvrez & Réservez</title> --}}
-
-    {{-- <!-- Favicons-->
-    <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}"> --}}
-
 
     <!-- GOOGLE WEB FONT -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -50,6 +44,15 @@
             }).then(f).catch(a)) : a()
         }(window, document, localStorage);
     </script>
+    
+    <!-- Custom CSS style for green background -->
+    <style>
+        body {
+            background-color: #e8f7f1;
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+
     <!-- BASE CSS -->
     <link href="{{ asset('assets-home/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/style.css') }}" rel="stylesheet">
@@ -57,10 +60,6 @@
     <link href="{{ asset('assets-home/css/home.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/detail-page.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
-
-    <!-- ALTERNATIVE COLORS CSS -->
-    <link href="#" id="colors" rel="stylesheet">
-    <!-- SPECIFIC CSS -->
     <link href="{{ asset('assets-home/css/submit.css') }}" rel="stylesheet">
 </head>
 
@@ -78,7 +77,6 @@
             @guest('client')
                 <ul id="top_menu">
                     <li><a href="{{ route('client_login_form') }}" class="login">Login</a></li>
-                    {{-- <li><a href="wishlist.html" class="wishlist_bt_top" title="Your wishlist">Your wishlist</a></li> --}}
                 </ul>
             @endguest
             @auth('client')
@@ -94,7 +92,6 @@
                             <div class="dropdown-menu">
                                 <div class="dropdown-menu-content">
                                     <ul>
-
                                         <li><a href="{{ route('client.logout') }}"><i class="icon_key"></i>Se
                                                 déconnecter</a></li>
                                     </ul>
@@ -118,9 +115,6 @@
                             height="35" alt=""></a>
                 </div>
                 <ul>
-
-
-
                     <li class="submenu">
                         @guest('client')
                             <a href="#0" class="show-submenu">Connexion</a>
@@ -129,21 +123,17 @@
                                     <ul>
                                         <li><a href="{{ route('client_login_form') }}">Connexion</a></li>
                                         <li><a href="{{ route('client.register') }}">Créer un compte</a></li>
-
                                     </ul>
                                 </li>
                                 <li class="third-level"><a href="#0">Espace <strong>Restaurant!</strong></a>
                                     <ul>
                                         <li><a href="{{ route('login_form') }}">Connexion</a></li>
-                                        <li><a href="{{ route('restaurant.register') }}">Registre votre restaurant</a></li>
-
+                                        <li><a href="{{ route('restaurant.register') }}">Enregistrez votre restaurant</a></li>
                                     </ul>
                                 </li>
                                 <li class="third-level"><a href="#0">Espace <strong>Admin!</strong></a>
                                     <ul>
                                         <li><a href="{{ route('admin_login_form') }}">Connexion</a></li>
-
-
                                     </ul>
                                 </li>
                             </ul>
@@ -154,17 +144,12 @@
                         <li><a href="{{ route('client.reservations') }}" target="_parent">Mes reservations</a></li>
                         </li>
                     @endauth
-
-
-
                 </ul>
             </nav>
         </div>
     </header>
     <div class="page-wrapper">
-
         @yield('guest')
-
     </div>
     <footer>
         <div class="container">
@@ -173,15 +158,9 @@
                     <h3 data-bs-target="#collapse_1">Liens rapides</h3>
                     <div class="collapse dont-collapse-sm links" id="collapse_1">
                         <ul>
-                            {{-- <li><a href="{{ route('book') }}">Êtes-vous un restaurant ? Pourquoi
-                                    soumettre à Resto?</a></li> --}}
                             <li><a href="{{ route('restaurant.register') }}">Êtes-vous un restaurant ? Pourquoi
                                     soumettre à Resto?</a></li>
                             <li><a href="{{ route('view_all') }}">Découvrez les restaurants disponibles</a></li>
-                            {{-- <li><a href="help.html">Help</a></li>
-							<li><a href="account.html">My account</a></li>
-							<li><a href="blog.html">Blog</a></li>
-							<li><a href="contacts.html">Contacts</a></li> --}}
                         </ul>
                     </div>
                 </div>
@@ -192,7 +171,6 @@
                             <li><a href="{{ route('client_login_form') }}">Client</a></li>
                             <li><a href="{{ route('login_form') }}">Proprietaire d'un restaurant</a></li>
                             <li><a href="{{ route('admin_login_form') }}">administrateur</a></li>
-
                         </ul>
                     </div>
                 </div>
@@ -200,34 +178,16 @@
                     <h3 data-bs-target="#collapse_3">Contacts</h3>
                     <div class="collapse dont-collapse-sm contacts" id="collapse_3">
                         <ul>
-                            <li><i class="icon_house_alt"></i>Fquih Ben Salah<br>MOROCCO</li>
-                            <li><i class="icon_mobile"></i>+212 642 912 362</li>
-                            <li><i class="icon_mail_alt"></i><a href="#0">Resto@mail.com</a></li>
+                        <li><i class="icon_house_alt"></i>Axel&Bryan<br>Benin</li>
+                            <li><i class="icon_mobile"></i>+2290140750121</li>
+                            <li><i class="icon_mail_alt"></i><a href="#0">restorant.application@mail.com</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    {{-- <h3 data-bs-target="#collapse_4">Keep in touch</h3> --}}
                     <div class="collapse dont-collapse-sm" id="collapse_4">
-                        {{-- <div id="newsletter">
-							<div id="message-newsletter"></div>
-							<form method="post" action="assets/newsletter.php" name="newsletter_form" id="newsletter_form">
-								<div class="form-group">
-									<input type="email" name="email_newsletter" id="email_newsletter" class="form-control" placeholder="Your email">
-									<button type="submit" id="submit-newsletter"><i class="arrow_carrot-right"></i></button>
-								</div>
-							</form>
-						</div> --}}
-                        {{-- <div class="follow_us">
-                            <h5>Suivez-nous</h5>
-                            <ul>
-                                <li><a href="#0"><img data-src="{{ asset('assets-home/img/facebook1.svg') }}"
-                                            alt="" class="lazy"></a></li>
-                            </ul>
-                        </div> --}}
                         <div class="follow_us"><br>
-                            <h5>© 2023 RESTO - TOUS LES DROITS SONT RÉSERVÉS</h5>
-
+                            <h5>© 2025 RESTO - TOUS LES DROITS SONT RÉSERVÉS</h5>
                         </div>
                     </div>
                 </div>
@@ -241,7 +201,6 @@
     <div id="toTop"></div><!-- Back to top button -->
 
     <div class="layer"></div><!-- Opacity Mask Menu Mobile -->
-
 
     <!-- COMMON SCRIPTS -->
     <script src="{{ asset('assets-home/js/common_scripts.min.js') }}"></script>
@@ -259,10 +218,6 @@
             typeSpeed: 50
         });
     </script>
-
-    <!-- COLOR SWITCHER  -->
-
-
 </body>
 
 </html>

@@ -6,64 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Foogra - Discover & Book the best restaurants at the best price">
     <meta name="author" content="Ansonika">
-    {{-- <title>Resto - Découvrez & Réservez</title> --}}
 
-
-    {{-- <!-- Favicons-->
+    <!-- Favicons-->
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}"> --}}
+    <link rel="apple-touch-icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}">
 
     <!-- GOOGLE WEB FONT -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" />
-    <link rel="preload" href="https://fonts.
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap"
-        as="fetch" crossorigin="anonymous">
-
-    <script type="text/javascript">
-        ! function(e, n, t) {
-            "use strict";
-            var o = "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap",
-                r = "__3perf_googleFonts_c2536";
-
-            function c(e) {
-                (n.head || n.body).appendChild(e)
-            }
-
-            function a() {
-                var e = n.createElement("link");
-                e.href = o, e.rel = "stylesheet", c(e)
-            }
-
-            function f(e) {
-                if (!n.getElementById(r)) {
-                    var t = n.createElement("style");
-                    t.id = r, c(t)
-                }
-                n.getElementById(r).innerHTML = e
-            }
-            e.FontFace && e.FontFace.prototype.hasOwnProperty("display") ? (t[r] && f(t[r]), fetch(o).then(function(e) {
-                return e.text()
-            }).then(function(e) {
-                return e.replace(/@font-face {/g, "@font-face{font-display:swap;")
-            }).then(function(e) {
-                return t[r] = e
-            }).then(f).catch(a)) : a()
-        }(window, document, localStorage);
-    </script>
     <!-- BASE CSS -->
     <link href="{{ asset('assets-home/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/style.css') }}" rel="stylesheet">
+
     <!-- SPECIFIC CSS -->
     <link href="{{ asset('assets-home/css/home.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/detail-page.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
-    <!-- SPECIFIC CSS -->
-    <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets-home/css/detail-page.css') }}" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #e8f7f1;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        header.header_in {
+            background-color: #e8f7f1;
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body>
@@ -137,7 +110,7 @@
                                 <li class="third-level"><a href="#0">Espace <strong>Restaurant!</strong></a>
                                     <ul>
                                         <li><a href="{{ route('login_form') }}">Connexion</a></li>
-                                        <li><a href="{{ route('restaurant.register') }}">Registre votre restaurant</a></li>
+                                        <li><a href="{{ route('restaurant.register') }}">Enregistrez votre restaurant</a></li>
 
                                     </ul>
                                 </li>

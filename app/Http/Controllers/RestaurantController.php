@@ -36,59 +36,81 @@ class RestaurantController extends Controller
 
 
     public function dashboard()
-    {
-        $restaurant = Auth::guard('restaurant')->user();
-        $restaurantId = $restaurant->id;
+{
+    $restaurant = Auth::guard('restaurant')->user();
+    $restaurantId = $restaurant->id;
 
-        $reservations = Reservation::where('created_at', '>=', now()->subDays(7))
+    $reservations = Reservation::where('created_at', '>=', now()->subDays(7))
+        ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
+            $query->where('id', $restaurantId);
+        })
+        ->get();
+
+    $labels = [];
+    $data = [];
+    $locale = 'fr'; // Set the locale to French
+
+    for ($i = 6; $i >= 0; $i--) {
+        $date = Carbon::now()->subDays($i)->locale($locale);
+        $formattedDate = $date->isoFormat('ddd'); // Format the day name according to the locale
+        $count = Reservation::whereDate('created_at', $date->format('Y-m-d'))
             ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
                 $query->where('id', $restaurantId);
             })
-            ->get();
-
-        $labels = [];
-        $data = [];
-        $locale = 'fr'; // Set the locale to French
-
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->locale($locale);
-            $formattedDate = $date->isoFormat('ddd'); // Format the day name according to the locale
-            $count = Reservation::whereDate('created_at', $date->format('Y-m-d'))
-                ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
-                    $query->where('id', $restaurantId);
-                })
-                ->count();
-            $labels[] = $formattedDate;
-            $data[] = $count;
-        }
-
-        $chartLabels = json_encode($labels);
-        $chartData = json_encode($data);
-
-        $restaurant = Auth::guard('restaurant')->user();
-        $tables = Table::all();
-        //reservation number
-        $reservationCount = Reservation::whereHas('table', function ($query) use ($restaurant) {
-            $query->where('restaurant_id', $restaurant->id);
-        })->count();
-        //table number
-        $tableCount = Table::whereHas('restaurant', function ($query) use ($restaurant) {
-            $query->where('restaurant_id', $restaurant->id);
-        })->count();
-
-
-        $restaurants = Restaurant::all();
-
-
-        $latestReservation = Reservation::whereHas('table', function ($query) use ($restaurant) {
-            $query->where('restaurant_id', $restaurant->id);
-        })->latest()->first();
-        // return $restaurant->lastReservation;
-
-        return view('restaurant.dashboard', compact('restaurant', 'reservationCount', 'tableCount', 'reservations', 'chartLabels', 'chartData', 'tables', 'latestReservation'));
+            ->count();
+        $labels[] = $formattedDate;
+        $data[] = $count;
     }
 
+    $chartLabels = json_encode($labels);
+    $chartData = json_encode($data);
 
+    // Calculate unique clients
+    $uniqueClients = Reservation::whereHas('table', function ($query) use ($restaurant) {
+        $query->where('restaurant_id', $restaurant->id);
+    })
+    ->distinct('client_id')
+    ->count('client_id');
+
+    // Reservation count
+    $reservationCount = Reservation::whereHas('table', function ($query) use ($restaurant) {
+        $query->where('restaurant_id', $restaurant->id);
+    })->count();
+
+    // Calculate table count
+    $tableCount = Table::where('restaurant_id', $restaurant->id)->count();
+
+    // Calculate reservation rate
+    $reservationRate = $tableCount > 0 
+        ? (($reservationCount / $tableCount) * 100) 
+        : 0;
+
+    // Total Revenue (default to 0 if no specific revenue column)
+    $totalRevenue = 0; // You may need to adjust this based on your actual revenue calculation
+
+    // Revenue Growth (default to 0)
+    $revenueGrowth = 0; // You may need to adjust this based on your actual revenue calculation
+
+    $tables = Table::all();
+    $latestReservation = Reservation::whereHas('table', function ($query) use ($restaurant) {
+        $query->where('restaurant_id', $restaurant->id);
+    })->latest()->first();
+
+    return view('restaurant.dashboard', compact(
+        'restaurant', 
+        'reservationCount', 
+        'uniqueClients', 
+        'reservationRate', 
+        'totalRevenue', 
+        'revenueGrowth',
+        'tableCount', 
+        'reservations', 
+        'chartLabels', 
+        'chartData', 
+        'tables', 
+        'latestReservation'
+    ));
+}
 
     public function connect(Request $request)
     {
@@ -129,6 +151,7 @@ class RestaurantController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'privacy_agreed' => 'accepted', // validation Laravel
             'phone_number' => 'required|regex:/^[0-9]+$/',
+            'restaurant_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validation de l'image
         ], [
             'name.required' => 'Le nom est requis.',
             'location.required' => 'La localisation est requise.',
@@ -158,8 +181,22 @@ class RestaurantController extends Controller
             'created_at' => Carbon::now(),
             'privacy_agreed' => true, // on stocke le consentement
         ]);
+        
+        // Traitement de l'image si elle est présente
+        if ($request->hasFile('restaurant_image')) {
+            $image = $request->file('restaurant_image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            
+            // Stocker l'image dans le dossier public/uploads/restaurants
+            $image->move(public_path('uploads/restaurants'), $imageName);
+            
+            // Mettre à jour directement l'objet restaurant avec le chemin de l'image
+            $restaurant->image_path = 'uploads/restaurants/' . $imageName;
+            $restaurant->save();
+        }
 
         $restaurant->privacy_agreed = $request->has('privacy_agreed');
+        $restaurant->save();
     
         Auth::guard("restaurant")->login($restaurant);
     
@@ -169,7 +206,6 @@ class RestaurantController extends Controller
 
     public function update(Request $request)
     {
-
         $restaurant = Restaurant::find($request->id);
         $restaurant->name = $request->name;
         $restaurant->email = $request->email;
@@ -230,6 +266,5 @@ class RestaurantController extends Controller
         // Passer cette variable à la vue
         return view('restaurant.menu', compact('restaurant'));
     }
-
-
+    
 }

@@ -4,7 +4,6 @@
     .reservation-actions {
         display: flex;
         gap: 10px;
-        /* espace entre les boutons */
         align-items: center;
     }
 
@@ -21,9 +20,10 @@
         background-color: #dc3545;
         color: white;
         border: none;
-        padding: 6px 12px;
+        padding: 6px 12px; /* corrigé ici */
         border-radius: 4px;
         cursor: pointer;
+        margin-top: -19px;
     }
 
     .btn-approve:hover {

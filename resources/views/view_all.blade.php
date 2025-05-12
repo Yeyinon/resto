@@ -14,19 +14,19 @@
                                     <div class="col-lg-4">
                                         <div class="form-group">
                                             <input class="form-control" type="text" name="query"
-                                                placeholder="What are you looking for...">
+                                                placeholder="Que recherchez vous ?...">
                                             <i class="icon_search"></i>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="form-group">
                                             <input class="form-control no_border_r" type="text" name="location"
-                                                placeholder="Address, neighborhood...">
+                                                placeholder="Cuisine, nom de restaurant...">
                                             <i class="icon_pin_alt"></i>
                                         </div>
                                     </div>
                                     <div class="col-lg-2">
-                                        <input type="submit" value="Search">
+                                        <input type="submit" value="RECHERCHE">
                                     </div>
                                 </div>
                             </form>
@@ -71,55 +71,39 @@
         </div>
         <!-- /filters_full -->
 
-
-
-
-        <div class="container margin_30_40">
-            <div class="row isotope-wrapper">
+        <div class="container my-5">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 @foreach ($restaurants as $restaurant)
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 isotope-item popular">
-                        <div class="strip">
-                            <figure>
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            @if($restaurant->image_path)
+                                <img src="{{ asset($restaurant->image_path) }}" class="card-img-top" alt="{{ $restaurant->name }}">
+                            @else
+                                <img src="{{ asset('assets-home/img/detail_3.jpg') }}" class="card-img-top"
+                                    alt="{{ $restaurant->name }}">
+                            @endif
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $restaurant->name }}</h5>
+                                <p class="card-text text-muted">{{ $restaurant->location }}</p>
                                 @if($restaurant->yums > 0)
-                                    <span class="ribbon off">+ {{  $restaurant->yums  }} Yums</span>
+                                    <span class="badge text-warning border border-warning bg-transparent">
+                                        +{{ $restaurant->yums }} Yums
+                                    </span>
                                 @endif
-                                <img src="{{ asset('assets-home/img/detail_3.jpg') }}"
-                                    data-src="{{ asset('assets-home/img/home_section_1.jpg') }}" class="img-fluid lazy" alt="">
-
-
-                                <a href="client/book/{{ $restaurant->id }}" class="strip_info">
-                                    <small>{{ $restaurant->name }}</small>
-                                    <div class="item_title">
-                                        <h3>{{ $restaurant->name }}</h3>
-                                        <small>{{ $restaurant->location }}</small>
-                                        {{-- <small>{{ $restaurant->description }}</small> --}}
-                                    </div>
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <a href="{{ url('client/book/' . $restaurant->id) }}" class="btn btn-outline-success w-100">
+                                    Réservez ici
                                 </a>
-                            </figure>
-                            <ul>
-                                <li><a class="loc_open" href="client/book/{{ $restaurant->id }}">Réservez ici</a></li>
-
-                                {{-- <li><span>Avg. Price 24$</span></li> --}}
-                                <li>
-                                    {{-- <div class="score"><span>Superb<em>350 Reviews</em></span><strong>8.9</strong></div>
-                                    --}}
-                                </li>
-                            </ul>
+                            </div>
                         </div>
                     </div>
                 @endforeach
             </div>
-            <!-- /row -->
-            <div class="pagination_fg">
-                <a href="#">&laquo;</a>
-                <a href="#" class="active">1</a>
-                <a href="#">2</a>
-                <a href="#">3</a>
-                <a href="#">4</a>
-                <a href="#">5</a>
-                <a href="#">&raquo;</a>
-            </div>
         </div>
+
+        <!-- /row -->
+
         <!-- /container -->
 
     </main>

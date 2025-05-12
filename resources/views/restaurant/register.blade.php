@@ -106,7 +106,7 @@
                                 </ul>
                             </div>
                         @endif
-                        <form method="post" action="{{ route('restaurant.register.create') }}">
+                        <form method="post" action="{{ route('restaurant.register.create') }}" enctype="multipart/form-data">
                             @csrf
                             <h6>Données personnelles</h6>
                             <div class="row">
@@ -129,8 +129,9 @@
                             <div class="row add_bottom_15">
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="Numéro de téléphone du resto(Mobile Money)"
-                                            name="phone_number" required>
+                                        <input type="text" class="form-control"
+                                            placeholder="Numéro de téléphone du resto(Mobile Money)" name="phone_number"
+                                            required>
                                     </div>
                                 </div>
                             </div>
@@ -140,6 +141,16 @@
                                     <div class="form-group">
                                         <input type="text" class="form-control" placeholder="Description du resto"
                                             name="description">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row add_bottom_15">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Image du restaurant</label>
+                                        <input type="file" class="form-control" name="restaurant_image" accept="image/*">
+                                        <small class="form-text text-muted">Téléchargez une image attrayante de votre
+                                            restaurant (format recommandé: JPG, PNG - max 2MB)</small>
                                     </div>
                                 </div>
                             </div>
