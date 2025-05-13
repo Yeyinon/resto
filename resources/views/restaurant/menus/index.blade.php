@@ -49,8 +49,13 @@
                             
                             <div class="menu-divider"></div>
                             
-                            <!-- Carrousel horizontal de plats -->
-                            <div class="plats-carousel-container">
+                            <!-- Carrousel horizontal de plats avec navigation -->
+                            <div class="plats-carousel-container" id="carousel-{{ $menu->id }}">
+                                <!-- Bouton navigation gauche -->
+                                <button class="carousel-nav carousel-prev" aria-label="Précédent">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                
                                 <div class="plats-carousel">
                                     @foreach($menu->plats as $plat)
                                         <div class="plat-card">
@@ -67,11 +72,21 @@
                                     @endforeach
                                 </div>
                                 
+                                <!-- Bouton navigation droite -->
+                                <button class="carousel-nav carousel-next" aria-label="Suivant">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                
                                 @if($menu->plats->count() > 2)
                                     <div class="carousel-indicators">
                                         <span class="carousel-indicator active"></span>
                                         <span class="carousel-indicator"></span>
                                         <span class="carousel-indicator"></span>
+                                    </div>
+                                    
+                                    <!-- Compteur de plats -->
+                                    <div class="plat-counter">
+                                        <span class="current-plat">1</span>/<span class="total-plats">{{ $menu->plats->count() }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -253,17 +268,11 @@
             font-size: 1.2rem;
         }
 
-        /* Grille des menus */
+        /* Liste verticale des menus */
         .menus-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 25px;
-        }
-        
-        @media (max-width: 768px) {
-            .menus-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         /* Carte de menu */
@@ -273,6 +282,8 @@
             box-shadow: 0 5px 15px var(--shadow-color);
             overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
         }
         
         .menu-card:hover {
@@ -281,23 +292,24 @@
         }
         
         .menu-header {
-            padding: 20px 20px 10px;
-            text-align: center;
+            padding: 25px 30px 15px;
+            text-align: left;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+            border-left: 4px solid var(--primary-color);
         }
         
         .menu-name {
-            font-size: 1.4rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: var(--text-dark);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .menu-info {
             color: #6b7280;
-            font-size: 0.9rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
         }
         
         .menu-info i {
@@ -306,31 +318,93 @@
         }
         
         .menu-divider {
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--primary-light), transparent);
-            margin: 0 20px 15px;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary-light), transparent);
+            margin: 0 30px 20px;
         }
 
         /* Carrousel de plats */
         .plats-carousel-container {
             position: relative;
-            padding: 10px 0;
-            margin-bottom: 15px;
+            padding: 20px 0;
+            margin-bottom: 20px;
         }
         
         .plats-carousel {
             display: flex;
-            overflow-x: auto;
+            overflow-x: hidden;
             scroll-behavior: smooth;
-            padding: 5px 20px;
+            padding: 5px 40px;
             scrollbar-width: none; /* Pour Firefox */
             -ms-overflow-style: none; /* Pour IE/Edge */
-            gap: 15px;
+            gap: 20px;
             scroll-snap-type: x mandatory;
         }
         
         .plats-carousel::-webkit-scrollbar {
             display: none; /* Pour Chrome/Safari */
+        }
+        
+        /* Boutons de navigation du carrousel */
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            transition: all 0.2s ease;
+            opacity: 0.9;
+        }
+        
+        .carousel-nav:hover {
+            background-color: var(--primary-light);
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-prev {
+            left: 10px;
+        }
+        
+        .carousel-next {
+            right: 10px;
+        }
+        
+        .carousel-nav i {
+            font-size: 1rem;
+        }
+        
+        .carousel-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Compteur de plats */
+        .plat-counter {
+            position: absolute;
+            top: -5px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        
+        .current-plat {
+            font-weight: 600;
         }
         
         .plat-card {
@@ -392,7 +466,7 @@
         .carousel-indicators {
             display: flex;
             justify-content: center;
-            padding: 10px 0 0;
+            padding: 15px 0 0;
             gap: 8px;
         }
         
@@ -402,20 +476,26 @@
             border-radius: 50%;
             background-color: #d1d5db;
             transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .carousel-indicator:hover {
+            background-color: #9ca3af;
         }
         
         .carousel-indicator.active {
             background-color: var(--primary-color);
-            width: 24px;
+            width: 30px;
             border-radius: 4px;
         }
 
         /* Actions du menu */
         .menu-actions {
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
             gap: 10px;
-            padding: 15px 20px 20px;
+            padding: 15px 30px 20px;
+            background-color: #f9fafb;
         }
         
         .btn-edit, .btn-delete {
@@ -495,4 +575,135 @@
             font-size: 0.95rem;
         }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupérer tous les carrousels
+        const carouselContainers = document.querySelectorAll('.plats-carousel-container');
+        
+        carouselContainers.forEach(container => {
+            const carousel = container.querySelector('.plats-carousel');
+            const prevBtn = container.querySelector('.carousel-prev');
+            const nextBtn = container.querySelector('.carousel-next');
+            const cards = carousel.querySelectorAll('.plat-card');
+            const indicators = container.querySelectorAll('.carousel-indicator');
+            const currentPlatEl = container.querySelector('.current-plat');
+            
+            if (cards.length <= 2) {
+                // Masquer les boutons de navigation s'il y a peu de plats
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                return;
+            }
+            
+            let currentIndex = 0;
+            const cardWidth = cards[0].offsetWidth + 15; // largeur + gap
+            
+            // Fonction pour mettre à jour le carrousel
+            function updateCarousel() {
+                // Faire défiler le carrousel
+                carousel.scrollTo({
+                    left: currentIndex * cardWidth,
+                    behavior: 'smooth'
+                });
+                
+                // Mettre à jour les indicateurs
+                if (indicators.length > 0) {
+                    indicators.forEach((indicator, i) => {
+                        indicator.classList.toggle('active', Math.floor(currentIndex / 2) === i);
+                    });
+                }
+                
+                // Mettre à jour le compteur de plats
+                if (currentPlatEl) {
+                    currentPlatEl.textContent = currentIndex + 1;
+                }
+                
+                // Activer/désactiver les boutons selon la position
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex >= cards.length - 1;
+                
+                // Ajouter une classe visuelle pour l'état désactivé
+                prevBtn.classList.toggle('disabled', currentIndex === 0);
+                nextBtn.classList.toggle('disabled', currentIndex >= cards.length - 1);
+            }
+            
+            // Événement pour le bouton précédent
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                }
+            });
+            
+            // Événement pour le bouton suivant
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < cards.length - 1) {
+                    currentIndex++;
+                    updateCarousel();
+                }
+            });
+            
+            // Événement pour les indicateurs
+            indicators.forEach((indicator, i) => {
+                indicator.addEventListener('click', () => {
+                    currentIndex = i * 2; // 2 éléments par page
+                    updateCarousel();
+                });
+            });
+            
+            // Initialiser l'état des boutons
+            updateCarousel();
+            
+            // Événement de défilement pour mettre à jour les indicateurs
+            carousel.addEventListener('scroll', () => {
+                const scrollPosition = carousel.scrollLeft;
+                const approximateIndex = Math.round(scrollPosition / cardWidth);
+                
+                if (approximateIndex !== currentIndex) {
+                    currentIndex = approximateIndex;
+                    // Mettre à jour uniquement les indicateurs visuels
+                    if (indicators.length > 0) {
+                        indicators.forEach((indicator, i) => {
+                            indicator.classList.toggle('active', Math.floor(currentIndex / 2) === i);
+                        });
+                    }
+                    if (currentPlatEl) {
+                        currentPlatEl.textContent = currentIndex + 1;
+                    }
+                }
+            });
+            
+            // Gérer les événements tactiles pour faciliter la navigation sur mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            carousel.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            carousel.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                if (touchStartX - touchEndX > swipeThreshold) {
+                    // Swipe gauche - aller à droite
+                    if (currentIndex < cards.length - 1) {
+                        currentIndex++;
+                        updateCarousel();
+                    }
+                } else if (touchEndX - touchStartX > swipeThreshold) {
+                    // Swipe droite - aller à gauche
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        updateCarousel();
+                    }
+                }
+            }
+        });
+    });
+    </script>
 @endsection
