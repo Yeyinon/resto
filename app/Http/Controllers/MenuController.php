@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Http\Kernel;
 use App\Models\Menu;
 use App\Models\Plat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -26,38 +28,52 @@ class MenuController extends Controller
 
     public function store(Request $request)
     {
+        // Déboguer les données reçues
+        \Log::info('Requête de création de menu:', [
+            'data' => $request->all()
+        ]);
+
+        // Tester la connexion du restaurant
+        $restaurant = auth()->guard('restaurant')->user();
+        \Log::info('Restaurant connecté:', [
+            'auth_check' => auth()->guard('restaurant')->check(),
+            'restaurant_id' => $restaurant ? $restaurant->id : null,
+        ]);
+        // Valider les données
         $request->validate([
             'nom' => 'required|string|max:255',
-            'plats.*.nom' => 'required|string|max:255',
+            'plats' => 'required|array|min:1',
+            'plats.*.nom' => 'required|string',
             'plats.*.prix' => 'required|numeric',
             'plats.*.photo' => 'nullable|image|max:2048',
         ]);
 
-        // 🔐 On récupère le restaurant actuellement connecté
+        // Récupérer l'ID du restaurant connecté
         $restaurant = auth()->guard('restaurant')->user();
 
-        // 🔗 Création du menu en le liant au restaurant
+        // Créer le menu avec le restaurant_id
         $menu = Menu::create([
             'nom' => $request->nom,
-            'restaurant_id' => auth()->guard('restaurant')->id(), // ← AJOUT
+            'restaurant_id' => $restaurant->id, // Ajouter cette ligne pour associer le menu au restaurant
         ]);
 
-        // 🥘 Création des plats associés
-        foreach ($request->plats as $plat) {
+        // Ajouter les plats associés
+        foreach ($request->plats as $index => $platData) {
+            // Gérer la photo (si elle existe)
             $photoPath = null;
-
-            if (isset($plat['photo'])) {
-                $photoPath = $plat['photo']->store('plat_images', 'public');
+            if (isset($platData['photo']) && $platData['photo']) {
+                $photoPath = $platData['photo']->store('plats', 'public');
             }
 
+            // Créer un plat associé au menu
             $menu->plats()->create([
-                'nom' => $plat['nom'],
-                'prix' => $plat['prix'],
+                'nom' => $platData['nom'],
+                'prix' => $platData['prix'],
                 'photo' => $photoPath,
             ]);
         }
 
-        return redirect()->route('restaurant.menus.index')->with('success', 'Menu créé avec succès.');
+        return redirect()->route('restaurant.menus.index')->with('success', 'Menu enregistré avec succès.');
     }
 
     public function edit(Menu $menu)

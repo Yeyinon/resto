@@ -275,31 +275,31 @@
                 Restaurant Dashboard
             </div>
             <ul class="nav-menu">
-                <li class="nav-item active" onclick="location.href='{{ route('restaurant.dashboard') }}'">
+                <li class="nav-item {{ Route::currentRouteName() == 'restaurant.dashboard' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.dashboard') }}'">
                     <span class="nav-icon"><i class="fas fa-dashboard"></i></span>
                     Tableau de Bord
                 </li>
-                <li class="nav-item" onclick="location.href='{{ route('restaurant.profile') }}'">
+                <li class="nav-item {{ Route::currentRouteName() == 'restaurant.profile' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.profile') }}'">
                     <span class="nav-icon"><i class="fas fa-user"></i></span>
                     Mon Profil
                 </li>
-                <li class="nav-item" onclick="location.href=''{{ route('restaurant.menus.index') }}'">
+                <li class="nav-item {{ Route::currentRouteName() == 'restaurant.menus.index' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.menus.index') }}'">
                     <span class="nav-icon">🍽️</span>
                     Gestion des Menus
                 </li>
-                <li class="nav-item nav-item-with-submenu">
+                <li class="nav-item nav-item-with-submenu {{ in_array(Route::currentRouteName(), ['restaurant.tables', 'restaurant.table.create']) ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fas fa-list"></i></span>
                     Tables
                     <ul class="submenu">
-                        <li class="submenu-item" onclick="location.href='{{ route('restaurant.tables') }}'">
+                        <li class="submenu-item {{ Route::currentRouteName() == 'restaurant.tables' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.tables') }}'">
                             Tous les Tables
                         </li>
-                        <li class="submenu-item" onclick="location.href='{{ route('restaurant.table.create') }}'">
+                        <li class="submenu-item {{ Route::currentRouteName() == 'restaurant.table.create' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.table.create') }}'">
                             Ajouter une Table
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item" onclick="location.href='{{ route('restaurant.reservations') }}'">
+                <li class="nav-item {{ Route::currentRouteName() == 'restaurant.reservations' ? 'active' : '' }}" onclick="location.href='{{ route('restaurant.reservations') }}'">
                     <span class="nav-icon"><i class="fas fa-list"></i></span>
                     Réservations
                 </li>
@@ -325,21 +325,45 @@
                 </div>
             </header>
 
-            <!-- Grille de statistiques -->
+            <!-- Contenu de la page -->
             <div class="page-wrapper">
-
-                    @yield('restaurant')
-
-                </div>
+                @yield('restaurant')
+            </div>
         </main>
     </div>
 
-
-
     <script>
-        // Toggle submenu
-        document.querySelector('.nav-item-with-submenu').addEventListener('click', function () {
-            this.classList.toggle('active');
+        // Script pour les sous-menus
+        document.querySelectorAll('.nav-item-with-submenu').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Empêcher la propagation si on clique directement sur l'élément parent
+                if (e.target === this || e.target.parentNode === this) {
+                    e.preventDefault();
+                    this.classList.toggle('active');
+                    
+                    // Afficher automatiquement le sous-menu si un de ses éléments est actif
+                    const hasActiveSubmenu = Array.from(this.querySelectorAll('.submenu-item')).some(
+                        subItem => subItem.classList.contains('active')
+                    );
+                    
+                    if (hasActiveSubmenu && !this.classList.contains('active')) {
+                        this.classList.add('active');
+                    }
+                }
+            });
+        });
+        
+        // Ouvrir automatiquement le sous-menu si un élément est actif au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.nav-item-with-submenu').forEach(item => {
+                const hasActiveSubmenu = Array.from(item.querySelectorAll('.submenu-item')).some(
+                    subItem => subItem.classList.contains('active')
+                );
+                
+                if (hasActiveSubmenu) {
+                    item.classList.add('active');
+                }
+            });
         });
     </script>
 </body>
