@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Menu;
+use App\Models\Plat;
+use App\Models\Comment;
 
 
 class RestaurantController extends Controller
@@ -36,81 +39,81 @@ class RestaurantController extends Controller
 
 
     public function dashboard()
-{
-    $restaurant = Auth::guard('restaurant')->user();
-    $restaurantId = $restaurant->id;
+    {
+        $restaurant = Auth::guard('restaurant')->user();
+        $restaurantId = $restaurant->id;
 
-    $reservations = Reservation::where('created_at', '>=', now()->subDays(7))
-        ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
-            $query->where('id', $restaurantId);
-        })
-        ->get();
-
-    $labels = [];
-    $data = [];
-    $locale = 'fr'; // Set the locale to French
-
-    for ($i = 6; $i >= 0; $i--) {
-        $date = Carbon::now()->subDays($i)->locale($locale);
-        $formattedDate = $date->isoFormat('ddd'); // Format the day name according to the locale
-        $count = Reservation::whereDate('created_at', $date->format('Y-m-d'))
+        $reservations = Reservation::where('created_at', '>=', now()->subDays(7))
             ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
                 $query->where('id', $restaurantId);
             })
-            ->count();
-        $labels[] = $formattedDate;
-        $data[] = $count;
+            ->get();
+
+        $labels = [];
+        $data = [];
+        $locale = 'fr'; // Set the locale to French
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->locale($locale);
+            $formattedDate = $date->isoFormat('ddd'); // Format the day name according to the locale
+            $count = Reservation::whereDate('created_at', $date->format('Y-m-d'))
+                ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
+                    $query->where('id', $restaurantId);
+                })
+                ->count();
+            $labels[] = $formattedDate;
+            $data[] = $count;
+        }
+
+        $chartLabels = json_encode($labels);
+        $chartData = json_encode($data);
+
+        // Calculate unique clients
+        $uniqueClients = Reservation::whereHas('table', function ($query) use ($restaurant) {
+            $query->where('restaurant_id', $restaurant->id);
+        })
+        ->distinct('client_id')
+        ->count('client_id');
+
+        // Reservation count
+        $reservationCount = Reservation::whereHas('table', function ($query) use ($restaurant) {
+            $query->where('restaurant_id', $restaurant->id);
+        })->count();
+
+        // Calculate table count
+        $tableCount = Table::where('restaurant_id', $restaurant->id)->count();
+
+        // Calculate reservation rate
+        $reservationRate = $tableCount > 0 
+            ? (($reservationCount / $tableCount) * 100) 
+            : 0;
+
+        // Total Revenue (default to 0 if no specific revenue column)
+        $totalRevenue = 0; // You may need to adjust this based on your actual revenue calculation
+
+        // Revenue Growth (default to 0)
+        $revenueGrowth = 0; // You may need to adjust this based on your actual revenue calculation
+
+        $tables = Table::all();
+        $latestReservation = Reservation::whereHas('table', function ($query) use ($restaurant) {
+            $query->where('restaurant_id', $restaurant->id);
+        })->latest()->first();
+
+        return view('restaurant.dashboard', compact(
+            'restaurant', 
+            'reservationCount', 
+            'uniqueClients', 
+            'reservationRate', 
+            'totalRevenue', 
+            'revenueGrowth',
+            'tableCount', 
+            'reservations', 
+            'chartLabels', 
+            'chartData', 
+            'tables', 
+            'latestReservation'
+        ));
     }
-
-    $chartLabels = json_encode($labels);
-    $chartData = json_encode($data);
-
-    // Calculate unique clients
-    $uniqueClients = Reservation::whereHas('table', function ($query) use ($restaurant) {
-        $query->where('restaurant_id', $restaurant->id);
-    })
-    ->distinct('client_id')
-    ->count('client_id');
-
-    // Reservation count
-    $reservationCount = Reservation::whereHas('table', function ($query) use ($restaurant) {
-        $query->where('restaurant_id', $restaurant->id);
-    })->count();
-
-    // Calculate table count
-    $tableCount = Table::where('restaurant_id', $restaurant->id)->count();
-
-    // Calculate reservation rate
-    $reservationRate = $tableCount > 0 
-        ? (($reservationCount / $tableCount) * 100) 
-        : 0;
-
-    // Total Revenue (default to 0 if no specific revenue column)
-    $totalRevenue = 0; // You may need to adjust this based on your actual revenue calculation
-
-    // Revenue Growth (default to 0)
-    $revenueGrowth = 0; // You may need to adjust this based on your actual revenue calculation
-
-    $tables = Table::all();
-    $latestReservation = Reservation::whereHas('table', function ($query) use ($restaurant) {
-        $query->where('restaurant_id', $restaurant->id);
-    })->latest()->first();
-
-    return view('restaurant.dashboard', compact(
-        'restaurant', 
-        'reservationCount', 
-        'uniqueClients', 
-        'reservationRate', 
-        'totalRevenue', 
-        'revenueGrowth',
-        'tableCount', 
-        'reservations', 
-        'chartLabels', 
-        'chartData', 
-        'tables', 
-        'latestReservation'
-    ));
-}
 
     public function connect(Request $request)
     {
@@ -260,11 +263,76 @@ class RestaurantController extends Controller
 
     public function showMenu($id)
     {
-        // Trouver le restaurant par son identifiant
+        // Récupérer le restaurant
         $restaurant = Restaurant::findOrFail($id);
+        
+        // Récupérer le nombre de tables
+        $tableCount = Table::where('restaurant_id', $id)->count();
+        
+        // Récupérer les commentaires associés à ce restaurant
+        $comments = Comment::with('client')
+                          ->where('restaurant_id', $id)
+                          ->orderBy('created_at', 'desc')
+                          ->get();
+        
+        // Récupérer les menus pour ce restaurant
+        $menus = Menu::where('restaurant_id', $id)
+                     ->get();
+        
+        // Récupérer les plats pour chaque menu
+        $plats = [];
+        foreach ($menus as $menu) {
+            $plats[$menu->id] = Plat::where('menu_id', $menu->id)
+                                    ->get();
+        }
+        
+        return view('client.restaurant.detail', compact(
+            'restaurant', 
+            'tableCount', 
+            'comments', 
+            'menus', 
+            'plats'
+        ));
+    }
 
-        // Passer cette variable à la vue
-        return view('restaurant.menu', compact('restaurant'));
+    public function getAvailableTables(Request $request)
+    {
+        $request->validate([
+            'restaurant_id' => 'required|integer',
+            'date' => 'required|date',
+            'time' => 'required|string',
+        ]);
+        
+        $restaurantId = $request->restaurant_id;
+        $date = $request->date;
+        $time = $request->time;
+        
+        // Récupérer toutes les tables du restaurant
+        $tables = Table::where('restaurant_id', $restaurantId)->get();
+        
+        // Récupérer les tables déjà réservées à cette date et heure
+        $reservedTableIds = Reservation::where('reservation_date', $date)
+                                      ->where('reservation_time', $time)
+                                      ->whereHas('table', function ($query) use ($restaurantId) {
+                                          $query->where('restaurant_id', $restaurantId);
+                                      })
+                                      ->pluck('table_id')
+                                      ->toArray();
+        
+        // Préparer les données de réponse
+        $tableData = [];
+        foreach ($tables as $table) {
+            $tableData[] = [
+                'id' => $table->id,
+                'number' => $table->number,
+                'capacity' => $table->capacity,
+                'is_available' => !in_array($table->id, $reservedTableIds)
+            ];
+        }
+        
+        return response()->json([
+            'tables' => $tableData
+        ]);
     }
     
 }

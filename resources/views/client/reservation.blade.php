@@ -1,550 +1,668 @@
-@extends('client.master')
-@section('client')
+@extends('master')
+@section('guest')
     <title>Resto - Reservation</title>
-    <main>
-        <div class="col-lg-8">
-
+    
+    <!-- Section titre de la page -->
+    <div class="page-title-section">
+        <div class="container">
+            <h1 class="page-title">Réservation</h1>
+            <div class="breadcrumb-modern">
+                <a href="/" class="breadcrumb-item">Accueil</a>
+                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+                <a href="{{ route('view_all') }}" class="breadcrumb-item">Restaurants</a>
+                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+                <span class="breadcrumb-item active">Réservation</span>
+            </div>
         </div>
+    </div>
+
+    <main class="main-content">
         <div class="container margin_detail">
             <div class="row">
                 <div class="col-lg-8">
-
-                    <div class="detail_page_head clearfix">
-                        <div class="breadcrumbs">
-                            <ul>
-                                <li><a href="/">Home</a></li>
-                                <li><a href="{{ route('view_all') }}">View restaurant</a></li>
-                                <li>Reservation</li>
-                            </ul>
+                    <!-- Informations du restaurant -->
+                    <div class="content-card">
+                        <div class="restaurant-info">
+                            <h2>{{ $restaurant->name }}</h2>
+                            <div class="restaurant-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> {{ $restaurant->location }}</span>
+                                <span><i class="fas fa-table"></i> {{ $tableCount }} tables</span>
+                                <span><i class="fas fa-gift"></i> +{{ $restaurant->yums }} yums</span>
+                            </div>
+                            <div class="restaurant-description">
+                                <p>{{ $restaurant->description }}</p>
+                            </div>
+                            <div class="restaurant-actions">
+                                <a href="https://www.google.com/maps/search/{{ urlencode($restaurant->location) }}" target="_blank" class="btn-primary-custom">
+                                    <i class="fas fa-directions"></i> Itinéraire
+                                </a>
+                            </div>
                         </div>
-                        {{-- <div class="title">
-                            <br>
-                            <h1>{{ $restaurant->name }}</h1><br>
-                            <h5>{{ $restaurant->location }}</h5>
-                            <h5>{{ $restaurant->description }}</h5>
-                            {{-- <a href="https://www.google.com/maps/dir//Assistance+%E2%80%93+H%C3%B4pitaux+De+Paris,+3+Avenue+Victoria,+75004+Paris,+Francia/@48.8606548,2.3348734,14z/data=!4m15!1m6!3m5!1s0x47e66e1de36f4147:0xb6615b4092e0351f!2sAssistance+Publique+-+H%C3%B4pitaux+de+Paris+(AP-HP)+-+Si%C3%A8ge!8m2!3d48.8568376!4d2.3504305!4m7!1m0!1m5!1m1!1s0x47e67031f8c20147:0xa6a9af76b1e2d899!2m2!1d2.3504327!2d48.8568361" target="blank">Get directions</a> --}}
-                        {{-- <ul class="tags">
-                            <li><a href="#0">Pizza</a></li>
-                            <li><a href="#0">Italian Food</a></li>
-                            <li><a href="#0">Best Price</a></li>
-                        </ul> --}}
-                        {{-- </div>  --}}
-
                     </div>
 
-                    <div class="tab-content" role="tablist">
-                        <div class="card-body info_content">
-                            <div class="other_info">
-                                <h2>{{ $restaurant->name }}</h2>
-                                <div class="row">
-
-                                    <div class="col-md-4">
-                                        <h3>Plus à propos de {{ $restaurant->name }}</h3>
-                                        <p><strong>Description </strong><br> {{ $restaurant->description }}</p>
-                                        <p><strong>Table</strong><br> Plus de {{ $tableCount }}</p>
-                                        <p><strong>Yums offre</strong><br><span class="loc_closed">+ {{ $restaurant->yums }} yums</span></p>
-
+                    <!-- Menu du restaurant -->
+                    <div class="content-card">
+                        <div class="menu-section">
+                            <h3><i class="fas fa-utensils"></i> Menu du restaurant</h3>
+                            
+                            @if(isset($plats) && count($plats) > 0)
+                                <div class="menu-items">
+                                    @foreach($plats as $plat)
+                                    <div class="menu-item">
+                                        <div class="menu-item-details">
+                                            <h4>{{ $plat->name }}</h4>
+                                            <p>{{ $plat->description }}</p>
+                                            <span class="menu-item-price">{{ $plat->price }} €</span>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <h3></h3><br>
-                                            <p><strong>Address </strong><br>{{ $restaurant->location }}</p>
-                                            <a href="https://www.google.com/maps/dir//Assistance+%E2%80%93+H%C3%B4pitaux+De+Paris,+3+Avenue+Victoria,+75004+Paris,+Francia/@48.8606548,2.3348734,14z/data=!4m15!1m6!3m5!1s0x47e66e1de36f4147:0xb6615b4092e0351f!2sAssistance+Publique+-+H%C3%B4pitaux+de+Paris+(AP-HP)+-+Si%C3%A8ge!8m2!3d48.8568376!4d2.3504305!4m7!1m0!1m5!1m1!1s0x47e67031f8c20147:0xa6a9af76b1e2d899!2m2!1d2.3504327!2d48.8568361" target="{{ $restaurant->location }}">Get directions</a></p>
-                                            {{-- <strong>Follow Us</strong><br> --}}
-
-                                    </div>
-                                    <div class="col-md-4">
-                                        {{-- <h3>Services</h3>
-                                        <p><strong>Credit Cards</strong><br> Mastercard, Visa, Amex</p>
-                                        <p><strong>Other</strong><br> Wifi, Parking, Wheelchair Accessible</p> --}}
-                                    </div>
+                                    @endforeach
                                 </div>
-                            </div>
+                            @else
+                                <div class="menu-empty">
+                                    <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                    <div class="detail_page_head clearfix">
-                        <div class="rating">
-                            <div class="score"><span>Nous vous remercions d'avoir choisi notre restaurant pour votre
-                                    prochain repas. Nous serions ravis de vous accueillir
-                                    <em>{{ $restaurant->name }}</em></span>
-                            </div>
-                        </div>
-                        <br>
-                        {{-- <form action="{{ route('comments.store') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
-                            <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}">
-                            <textarea name="comment" rows="4" required></textarea>
-                            <button type="submit">Submit Comment</button>
-                        </form> --}}
-                        <!-- index.blade.php -->
 
-                        <hr>
-                        <div class="box_general write_review">
-                            <div class="form-group">
+                    <!-- Section commentaires -->
+                    <div class="content-card">
+                        <div class="comment-section">
+                            <h3><i class="fas fa-comments"></i> Avis et commentaires</h3>
+                            
+                            <!-- Formulaire de commentaire -->
+                            <div class="comment-form">
                                 <form action="{{ route('comments.store') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
                                     <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}">
-                                    <label>Votre avis</label>
-                                    <textarea name="comment" required class="form-control" style="height: 100px;"
-                                        placeholder="Rédigez votre avis pour aider les autres à en savoir plus sur cette entreprise en ligne"></textarea>
-                                    <button type="submit" class="btn_1" style="text-align: left">Poster le commentaire</button><br>
+                                    <div class="form-group">
+                                        <label for="comment">Votre avis</label>
+                                        <textarea name="comment" id="comment" required class="form-control" rows="4"
+                                            placeholder="Partagez votre expérience pour aider les autres utilisateurs"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn-primary-custom">
+                                        <i class="fas fa-paper-plane"></i> Publier
+                                    </button>
                                 </form>
                             </div>
-                            <br><label>Commentaires</label>
-                        </div>
-                        @foreach ($comments as $comment)
-                        <div class="review_card">
-                            <div class="row">
-                                <div class="col-md-2 user_info">
-                                        <figure><img src="{{ asset('img/client_user.png') }}" alt=""></figure>
-                                        <h5>{{ $comment->client->name }}</h5>
-                                </div>
-                                <div class="col-md-10 review_content">
-                                    <div class="clearfix add_bottom_15">
-                                        {{-- <span class="rating">8.5<small>/10</small> <strong>Rating average</strong></span> --}}
-                                        <em>{{ $comment->created_at }}</em>
+                            
+                            <!-- Liste des commentaires -->
+                            <div class="comments-list">
+                                <h4>{{ count($comments) }} Avis</h4>
+                                
+                                @foreach ($comments as $comment)
+                                <div class="comment-item">
+                                    <div class="row">
+                                        <div class="col-md-2 user-info">
+                                            <img src="{{ asset('img/client_user.png') }}" alt="{{ $comment->client->name }}" class="user-avatar">
+                                            <h5>{{ $comment->client->name }}</h5>
+                                        </div>
+                                        <div class="col-md-10 comment-content">
+                                            <div class="comment-meta">
+                                                <span class="comment-date">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                            <p>{{ $comment->comment }}</p>
+                                        </div>
                                     </div>
-                                    <h4>{{ $comment->client->name }}</h4>
-                                    <p>{{ $comment->comment }}</p>
-
                                 </div>
+                                @endforeach
                             </div>
-                            <!-- /row -->
                         </div>
-                        @endforeach
                     </div>
                 </div>
-                <!-- /col -->
-
+                
+                <!-- Colonne de réservation -->
                 <div class="col-lg-4" id="sidebar_fixed">
-                    <div class="box_booking">
-                        <div class="head">
-                            <h3>Réservez votre table</h3>
-                            <div class="offer">Offrez {{ $restaurant->yums }} yums !
+                    <div class="content-card reservation-card">
+                        <div class="reservation-header">
+                            <h3><i class="fas fa-calendar-check"></i> Réservez votre table</h3>
+                            <div class="yums-offer">
+                                <i class="fas fa-gift"></i> +{{ $restaurant->yums }} yums offerts
                             </div>
                         </div>
-                        <div class="main">
-                            <form method="post" action="{{ route('client.reservation.create') }}">
+                        
+                        <div class="reservation-form">
+                            <form method="post" action="{{ route('client.reservation.create') }}" id="reservationForm">
                                 @csrf
                                 <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}">
                                 <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
 
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">Date</span>
+                                <!-- Date de réservation -->
+                                <div class="form-group">
+                                    <label><i class="fas fa-calendar-alt"></i> Date</label>
                                     <input required class="form-control date-input" type="date" name="reservation_date"
-                                        min="{{ date('Y-m-d') }}">
+                                        min="{{ date('Y-m-d') }}" id="reservation_date">
                                 </div>
 
-
-                                <input type="text" id="datepicker_field">
-                                <div id="DatePicker"></div>
-
-                                <div class="dropdown time">
-                                    <a href="javascript:void(0)" data-bs-toggle="dropdown">Heure <span id="selected_time"></span></a>
-                                    <div class="dropdown-menu">
-                                        <div class="dropdown-menu-content">
-                                            <h4>Déjeuner</h4>
-                                            <div class="radio_select add_bottom_15">
-                                                <ul>
-                                                    <li>
-                                                        <input type="radio" id="time_1" name="reservation_time"
-                                                            value="12:00:00">
-                                                        <label for="time_1">12.00<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_2" name="reservation_time"
-                                                            value="12:30:00">
-                                                        <label for="time_2">12.30<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_3" name="reservation_time"
-                                                            value="13:00:00">
-                                                        <label for="time_3">1.00 <em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_4" name="reservation_time"
-                                                            value="13:30:00">
-                                                        <label for="time_4">1.30 <em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_5" name="reservation_time"
-                                                            value="14:00:00">
-                                                        <label for="time_5">2.00 <em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_6" name="reservation_time"
-                                                            value="14:30:00">
-                                                        <label for="time_6">2.30 <em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_7" name="reservation_time"
-                                                            value="15:00:00">
-                                                        <label for="time_7">3.00 <em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_8" name="reservation_time"
-                                                            value="15:30:00">
-                                                        <label for="time_8">3.30 <em>PM</em></label>
-                                                    </li>
-                                                </ul>
+                                <!-- Heure de réservation -->
+                                <div class="form-group">
+                                    <label><i class="fas fa-clock"></i> Heure</label>
+                                    <div class="time-slots">
+                                        <div class="time-category">
+                                            <h5>Déjeuner</h5>
+                                            <div class="time-options">
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_1" name="reservation_time" value="12:00:00">
+                                                    <label for="time_1">12:00</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_2" name="reservation_time" value="12:30:00">
+                                                    <label for="time_2">12:30</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_3" name="reservation_time" value="13:00:00">
+                                                    <label for="time_3">13:00</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_4" name="reservation_time" value="13:30:00">
+                                                    <label for="time_4">13:30</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_5" name="reservation_time" value="14:00:00">
+                                                    <label for="time_5">14:00</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_6" name="reservation_time" value="14:30:00">
+                                                    <label for="time_6">14:30</label>
+                                                </div>
                                             </div>
-                                            <!-- /time_select -->
-                                            <h4>Dîner</h4>
-                                            <div class="radio_select add_bottom_15">
-                                                <ul>
-                                                    <li>
-                                                        <input type="radio" id="time_11" name="reservation_time"
-                                                            value="20:00:00">
-                                                        <label for="time_11">8.00<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_12" name="reservation_time"
-                                                            value="20:30:00">
-                                                        <label for="time_12">8.30<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_13" name="reservation_time"
-                                                            value="21:00:00">
-                                                        <label for="time_13">9.00<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_14" name="reservation_time"
-                                                            value="21:30:00">
-                                                        <label for="time_14">9.30<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_15" name="reservation_time"
-                                                            value="22:00:00">
-                                                        <label for="time_15">10.00<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_16" name="reservation_time"
-                                                            value="22:30:00">
-                                                        <label for="time_16">10.30<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_17" name="reservation_time"
-                                                            value="23:00:00">
-                                                        <label for="time_17">11.00<em>PM</em></label>
-                                                    </li>
-                                                    <li>
-                                                        <input type="radio" id="time_18" name="reservation_time"
-                                                            value="23:30:00">
-                                                        <label for="time_18">11.30<em>PM</em></label>
-                                                    </li>
-                                                </ul>
+                                        </div>
+                                        
+                                        <div class="time-category">
+                                            <h5>Dîner</h5>
+                                            <div class="time-options">
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_11" name="reservation_time" value="20:00:00">
+                                                    <label for="time_11">20:00</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_12" name="reservation_time" value="20:30:00">
+                                                    <label for="time_12">20:30</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_13" name="reservation_time" value="21:00:00">
+                                                    <label for="time_13">21:00</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_14" name="reservation_time" value="21:30:00">
+                                                    <label for="time_14">21:30</label>
+                                                </div>
+                                                <div class="time-option">
+                                                    <input type="radio" id="time_15" name="reservation_time" value="22:00:00">
+                                                    <label for="time_15">22:00</label>
+                                                </div>
                                             </div>
-                                            <!-- /time_select -->
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- <div class="input-group mb-3">
-                                    <span class="input-group-text">Heure</span>
-                                    <select required class="form-select" name="reservation_time">
-                                        <option value="" disabled selected>sélectionner</option>
-                                        <optgroup label="Déjeuner">
-                                            <option value="12:00:00">12:00 AM</option>
-                                            <option value="12:30:00">12.30 AM</option>
-                                            <option value="01:00:00">1.00 AM</option>
-                                            <option value="01:30:00">1.30 AM</option>
-                                        </optgroup>
-                                        <optgroup label="Dîner">
-                                            <option value="08:00:00">20.00 PM</option>
-                                            <option value="08:30:00">20.30 PM</option>
-                                            <option value="09:00:00">21.00 PM</option>
-                                            <option value="09:30:00">21.30 PM</option>
-                                        </optgroup>
-                                    </select>
-                                </div> --}}
-                                <div class="dropdown people">
-                                    <a href="#" data-bs-toggle="dropdown">Personne <span
-                                            id="selected_people"></span></a>
-                                    <div class="dropdown-menu">
-                                        <div class="dropdown-menu-content">
-                                            <h4>Combien de personnes?</h4>
-                                            <div class="radio_select">
-                                                <ul id="table-options">
-                                                    {{-- @foreach ($restaurant->tables->where('status', '=', 'Disponible')->groupBy('guest_number') as $table)
-                                                        @if ($table->count() > 1)
-                                                            <p>{{ $table[0]->guest_number }} </p>
-
-                                                            {{-- @foreach ($table as $x)
-                                                                <p>{{ $x->guest_number }} / {{ $x->number }}</p>
-                                                            @endforeach --}}
-                                                    {{-- @else
-                                                            <p>{{ $table[0]->guest_number }}/{{ $table[0]->number }}</p> --}}
-                                                    {{-- <p>{{ $table->location }}</p> --}}
-                                                    {{-- <p>{{ $table->count() }}</p> --}}
-                                                    {{-- <p>{{ $table->count() }}</p> --}}
-                                                    {{-- @endif
-                                                    @endforeach --}}
-
-
-                                                    @foreach ($restaurant->tables->where('status', '=', 'Disponible')->groupBy('guest_number') as $table)
-                                                        @if ($table->count() > 1 && $table[0]->location != $table[1]->location)
-                                                            <li>
-                                                                <input type="radio" id="people_{{ $table[0]->id }}"
-                                                                    name="table_id" value="{{ $table[0]->id }}">
-                                                                <label
-                                                                    for="people_{{ $table[0]->id }}">{{ $table[0]->guest_number }}<em>{{ $table[0]->location }}</em>
-                                                                </label>
-                                                            </li>
-                                                            <li>
-                                                                <input type="radio" id="people_{{ $table[1]->id }}"
-                                                                    name="table_id" value="{{ $table[1]->id }}">
-                                                                <label
-                                                                    for="people_{{ $table[1]->id }}">{{ $table[1]->guest_number }}<em>{{ $table[1]->location }}</em>
-                                                                </label>
-                                                            </li>
-                                                        @else
-                                                            <li>
-                                                                <input type="radio" id="people_{{ $table[0]->id }}"
-                                                                    name="table_id" value="{{ $table[0]->id }}">
-                                                                <label
-                                                                    for="people_{{ $table[0]->id }}">{{ $table[0]->guest_number }}<em>{{ $table[0]->location }}</em>
-                                                                </label>
-                                                            </li>
-                                                        @endif
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                            <!-- /people_select -->
-                                        </div>
+                                <!-- Sélection de table -->
+                                <div class="form-group">
+                                    <label><i class="fas fa-users"></i> Table</label>
+                                    <div class="table-options" id="table-options">
+                                        <p class="select-date-time-message">Veuillez d'abord sélectionner une date et une heure</p>
                                     </div>
                                 </div>
-                                <!-- /dropdown -->
-                                {{-- <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}"> --}}
-                                {{-- <div class="input-group mb-3">
-                                    <span class="input-group-text">Combien de personnes?</span>
-                                    <select required class="form-control " id="number_of_people" name="table_id">
-                                        <option value="" disabled selected>sélectionner</option>
-                                        @foreach ($restaurant->tables as $table)
-                                            @if ($table->status == 'Disponible')
-                                                <option value="{{ $table->id }}">
-                                                    <strong>{{ $table->guest_number }}</strong> et {{ $table->location }}
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                </div> --}}
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">E-mail</span>
-                                    <input class="form-control " required type="email" name="reservation_email"
-                                        @if (Auth::guard('client')->check()) value="{{ Auth::guard('client')->user()->email }}">
-                                        @else
-                                        placeholder="Votre email"> @endif
-                                        </div>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text">Téléphone</span>
-                                        <input class="form-control " required type="text" name="reservation_tele"
-                                            placeholder="Votre téléphone">
-                                    </div>
-                                    <button type="submit" class="btn_1 full-width mb_5">Réservez maintenant</button>
-                                    <div class="text-center"><small>Pas d'argent facturé sur ces étapes</small></div>
 
+                                <!-- Coordonnées -->
+                                <div class="form-group">
+                                    <label><i class="fas fa-envelope"></i> Email</label>
+                                    <input class="form-control" required type="email" name="reservation_email"
+                                        @if (Auth::guard('client')->check()) value="{{ Auth::guard('client')->user()->email }}" @else placeholder="Votre email" @endif>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label><i class="fas fa-phone"></i> Téléphone</label>
+                                    <input class="form-control" required type="text" name="reservation_tele"
+                                        placeholder="Votre téléphone">
+                                </div>
+
+                                <!-- Bouton de réservation -->
+                                <button type="submit" class="btn-primary-custom btn-block">
+                                    <i class="fas fa-check-circle"></i> Réserver maintenant
+                                </button>
+                                
+                                <div class="reservation-info">
+                                    <small><i class="fas fa-info-circle"></i> Aucun frais ne sera prélevé à cette étape</small>
+                                </div>
                             </form>
                         </div>
                     </div>
-                    <div class="col-lg" id="sidebar_fixed">
-                        <div class="box_booking">
-                            <div class="main">
-                                Réservez sur Resto pour cumuler des Yums et profiter de remises fidélité exclusives
-                            </div>
+                    
+                    <div class="content-card yums-info-card">
+                        <div class="yums-info">
+                            <i class="fas fa-award"></i>
+                            <p>Réservez sur Resto pour cumuler des Yums et profiter de remises fidélité exclusives</p>
                         </div>
                     </div>
-                    <!-- /dropdown -->
-
-                    <!-- /dropdown -->
-                    {{-- <a href="wishlist.html" class="btn_1 full-width outline wishlist"><i class="icon_heart"></i> Add to wishlist</a> --}}
                 </div>
             </div>
-            <!-- /box_booking -->
-            {{-- <ul class="share-buttons">
-                    <li><a class="fb-share" href="#0"><i class="social_facebook"></i> Share</a></li>
-                    <li><a class="twitter-share" href="#0"><i class="social_twitter"></i> Share</a></li>
-                    <li><a class="gplus-share" href="#0"><i class="social_googleplus"></i> Share</a></li>
-                </ul> --}}
         </div>
-
-        </div>
-        <!-- /row -->
-        </div>
-        <!-- /container -->
-
     </main>
-    <script>
-        // Datepicker
-        var dates = {}
-        dates[new Date('10/23/2019')] = '-40%';
-        dates[new Date('12/14/2019')] = '-20%';
-        dates[new Date('01/25/2020')] = '-30%';
 
-        $('#DatePicker').datepicker({
-            showButtonPanel: false,
-            inline: true,
-            altField: '#datepicker_field',
-            minDate: 0,
-            beforeShowDay: function(date) {
-
-                var hlText = dates[date];
-                var date2 = new Date(date);
-                var tglAja = date2.getDate();
-                if (hlText) {
-                    updateDatePickerCells(tglAja, hlText);
-                    return [true, "", hlText];
-                } else {
-                    return [true, '', ''];
-                }
-            },
-        });
-
-        function updateDatePickerCells(a, b) {
-
-            var num = parseInt(a);
-
-            setTimeout(function() {
-
-                $('.ui-datepicker td > *').each(function(idx, elem) {
-
-                    if ((idx + 1) == num) {
-                        value = b;
-                    } else {
-                        value = 0;
-                    }
-
-                    var className = 'datepicker-content-' + CryptoJS.MD5(value).toString();
-
-                    if (value == 0)
-                        addCSSRule('.ui-datepicker td a.' + className +
-                            ':after {content: "\\a0";}'); //&nbsp;
-                    else
-                        addCSSRule('.ui-datepicker td a.' + className + ':after {content: "' + value +
-                            '";}');
-
-                    $(this).addClass(className);
-                });
-            }, 0);
+    <style>
+        /* Styles spécifiques à la page de réservation */
+        .restaurant-info {
+            margin-bottom: 20px;
         }
-        var dynamicCSSRules = [];
+        
+        .restaurant-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 15px 0;
+            color: #555;
+        }
+        
+        .restaurant-meta span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .restaurant-meta i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        .restaurant-description {
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        /* Menu section */
+        .menu-section {
+            margin-top: 10px;
+        }
+        
+        .menu-items {
+            margin-top: 20px;
+        }
+        
+        .menu-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item-details h4 {
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .menu-item-price {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .menu-empty {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* Comment section */
+        .comment-section {
+            margin-top: 10px;
+        }
+        
+        .comment-form {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .comments-list {
+            margin-top: 30px;
+        }
+        
+        .comment-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-info {
+            text-align: center;
+        }
+        
+        .comment-meta {
+            margin-bottom: 10px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        /* Reservation section */
+        .reservation-card {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .reservation-header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 15px;
+        }
+        
+        .yums-offer {
+            margin-top: 10px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .yums-offer i {
+            margin-right: 5px;
+        }
+        
+        .time-slots {
+            margin: 15px 0;
+        }
+        
+        .time-category {
+            margin-bottom: 15px;
+        }
+        
+        .time-category h5 {
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        
+        .time-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .time-option {
+            position: relative;
+        }
+        
+        .time-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .time-option label {
+            display: block;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .time-option input[type="radio"]:checked + label {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .table-options {
+            margin: 15px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .table-option {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .table-option.available {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+        }
+        
+        .table-option.reserved {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .table-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .table-option input[type="radio"]:checked + label {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+        
+        .table-option-details {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .table-option-location {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .select-date-time-message {
+            text-align: center;
+            color: #777;
+            padding: 20px 0;
+        }
+        
+        .reservation-info {
+            text-align: center;
+            margin-top: 15px;
+            color: #777;
+        }
+        
+        .yums-info-card {
+            margin-top: 20px;
+        }
+        
+        .yums-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .yums-info i {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+        
+        /* Style pour bouton primary sur toute la largeur */
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+    </style>
 
-        function addCSSRule(rule) {
-            if ($.inArray(rule, dynamicCSSRules) == -1) {
-                $('head').append('<style>' + rule + '</style>');
-                dynamicCSSRules.push(rule);
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const dateInput = document.getElementById('reservation_date');
+    const timeInputs = document.querySelectorAll('input[name="reservation_time"]');
+    const tableOptionsContainer = document.getElementById('table-options');
+    const reservationForm = document.getElementById('reservationForm');
+    
+    // Fonction pour mettre à jour les tables disponibles
+    function updateAvailableTables() {
+        const selectedDate = dateInput.value;
+        let selectedTime = null;
+        
+        for (const timeInput of timeInputs) {
+            if (timeInput.checked) {
+                selectedTime = timeInput.value;
+                break;
             }
         }
-
-        $('#datepicker_field').on('change', function() {
-            $('#DatePicker').datepicker('setDate', $(this).val());
-        });
-    </script>
-<script>
-$(document).ready(function() {
-    // Fonction pour vérifier les tables disponibles
-    function checkTableAvailability() {
-        const selectedDate = $('input[name="reservation_date"]').val();
-        const selectedTime = $('input[name="reservation_time"]:checked').val();
         
         // Vérifier si date et heure sont sélectionnées
-        if (selectedDate && selectedTime) {
-            // Faire une requête AJAX pour obtenir les tables déjà réservées
-            $.ajax({
-                url: '/check-table-availability',
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    restaurant_id: '{{ $restaurant->id }}',
-                    reservation_date: selectedDate,
-                    reservation_time: selectedTime
-                },
-                success: function(response) {
-                    // Réinitialiser l'apparence de toutes les tables
-                    $('.radio_select ul li label').removeClass('table-available table-reserved');
-                    
-                    if (response.reservedTables && response.reservedTables.length > 0) {
-                        // Marquer les tables réservées en rouge
-                        response.reservedTables.forEach(function(tableId) {
-                            $('input[name="table_id"][value="' + tableId + '"]')
-                                .closest('li')
-                                .find('label')
-                                .addClass('table-reserved');
-                        });
-                        
-                        // Marquer les autres tables en vert (disponibles)
-                        $('input[name="table_id"]').each(function() {
-                            if (!response.reservedTables.includes(parseInt($(this).val()))) {
-                                $(this).closest('li').find('label').addClass('table-available');
-                            }
-                        });
-                    } else {
-                        // Si aucune table n'est réservée, toutes sont disponibles
-                        $('.radio_select ul li label').addClass('table-available');
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Erreur lors de la vérification des tables:', xhr.responseText);
-                }
-            });
+        if (!selectedDate || !selectedTime) {
+            tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Veuillez d\'abord sélectionner une date et une heure</p>';
+            return;
         }
-    }
-    
-    // Déclencher la vérification lorsque la date ou l'heure change
-    $('input[name="reservation_date"]').on('change', checkTableAvailability);
-    $('input[name="reservation_time"]').on('change', checkTableAvailability);
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const dateInput = document.querySelector('input[name="reservation_date"]');
-    const timeRadios = document.querySelectorAll('input[name="reservation_time"]');
-    const tableOptionsContainer = document.getElementById('table-options');
-
-    function fetchTables() {
-        const date = dateInput.value;
-        const timeRadio = document.querySelector('input[name="reservation_time"]:checked');
-        const time = timeRadio ? timeRadio.value : null;
-        const restaurantId = "{{ $restaurant->id }}";
-
-        if (!date || !time) return;
-
-        fetch(`/tables/disponibles?restaurant_id=${restaurantId}&date=${date}&time=${time}`)
-            .then(response => response.json())
-            .then(data => {
-                const tables = data.tables;
-                const reserved = data.reservées;
-                tableOptionsContainer.innerHTML = ''; // reset
-
+        
+        // Afficher un message de chargement
+        tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Chargement des tables disponibles...</p>';
+        
+        // Faire une requête pour obtenir les tables disponibles
+        fetch(`/api/available-tables?restaurant_id={{ $restaurant->id }}&date=${selectedDate}&time=${selectedTime}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur réseau: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Debug: afficher les données reçues dans la console
+            console.log("Données reçues:", data);
+            
+            // Vider le conteneur
+            tableOptionsContainer.innerHTML = '';
+            
+            // Utiliser les bonnes clés selon la structure de votre réponse JSON
+            const availableTables = data.tables || [];
+            const reservedTableIds = data.reservées || [];
+            
+            if (availableTables.length === 0) {
+                tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure</p>';
+                return;
+            }
+            
+            // Grouper les tables par nombre de personnes
+            const tablesByCapacity = {};
+            availableTables.forEach(table => {
+                const capacity = table.guest_number || table.capacity;
+                if (!tablesByCapacity[capacity]) {
+                    tablesByCapacity[capacity] = [];
+                }
+                tablesByCapacity[capacity].push(table);
+            });
+            
+            // Créer les options de table
+            Object.keys(tablesByCapacity).sort((a, b) => a - b).forEach(capacity => {
+                const tables = tablesByCapacity[capacity];
+                
                 tables.forEach(table => {
-                    if (!reserved.includes(table.id)) {
-                        const li = document.createElement('li');
-                        li.innerHTML = `
-                            <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}">
-                            <label for="table_${table.id}">
-                                ${table.guest_number} personnes <em>${table.location}</em>
+                    const isReserved = reservedTableIds.includes(table.id);
+                    const tableDiv = document.createElement('div');
+                    tableDiv.className = `table-option ${isReserved ? 'reserved' : 'available'}`;
+                    
+                    // Utiliser la propriété correcte pour le nombre de personnes
+                    const guestNumber = table.guest_number || table.capacity;
+                    
+                    if (isReserved) {
+                        // Table réservée - non sélectionnable
+                        tableDiv.innerHTML = `
+                            <div class="table-option-content">
+                                <div class="table-option-details">
+                                    <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
+                                    <span class="table-status">
+                                        <i class="fas fa-times-circle"></i> Réservée
+                                    </span>
+                                </div>
+                                <div class="table-option-location">
+                                    <i class="fas fa-map-marker-alt"></i> ${table.location}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Table disponible - sélectionnable
+                        tableDiv.innerHTML = `
+                            <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}" required>
+                            <label for="table_${table.id}" class="table-label">
+                                <div class="table-option-content">
+                                    <div class="table-option-details">
+                                        <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
+                                        <span class="table-status">
+                                            <i class="fas fa-check-circle"></i> Disponible
+                                        </span>
+                                    </div>
+                                    <div class="table-option-location">
+                                        <i class="fas fa-map-marker-alt"></i> ${table.location}
+                                    </div>
+                                </div>
                             </label>
                         `;
-                        tableOptionsContainer.appendChild(li);
+                        
+                        // Rendre toute la div clickable pour sélectionner la radio
+                        tableDiv.addEventListener('click', function() {
+                            const radio = this.querySelector('input[type="radio"]');
+                            if (radio) {
+                                radio.checked = true;
+                                // Mettre en évidence la table sélectionnée
+                                document.querySelectorAll('.table-option.available').forEach(el => {
+                                    el.style.boxShadow = 'none';
+                                });
+                                this.style.boxShadow = '0 0 0 2px var(--primary-color)';
+                            }
+                        });
                     }
+                    
+                    tableOptionsContainer.appendChild(tableDiv);
                 });
-
-                if (tableOptionsContainer.innerHTML === '') {
-                    tableOptionsContainer.innerHTML = '<li><em>Aucune table disponible à cette heure.</em></li>';
-                }
-            })
-            .catch(error => {
-                console.error("Erreur lors de la récupération des tables :", error);
             });
+            
+            // S'assurer qu'au moins une table est sélectionnée si disponible
+            const firstAvailableRadio = tableOptionsContainer.querySelector('input[type="radio"]');
+            if (firstAvailableRadio) {
+                firstAvailableRadio.checked = true;
+                firstAvailableRadio.closest('.table-option').style.boxShadow = '0 0 0 2px var(--primary-color)';
+            }
+        })
+        .catch(error => {
+            console.error("Erreur lors de la récupération des tables :", error);
+            tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Erreur lors du chargement des tables. Veuillez réessayer.</p>';
+        });
     }
-
-    dateInput.addEventListener("change", fetchTables);
-    timeRadios.forEach(radio => {
-        radio.addEventListener("change", fetchTables);
+    
+    // Ajouter les écouteurs d'événements
+    dateInput.addEventListener('change', updateAvailableTables);
+    timeInputs.forEach(input => {
+        input.addEventListener('change', updateAvailableTables);
     });
+    
+    // Validation du formulaire avant soumission
+    reservationForm.addEventListener('submit', function(event) {
+        const selectedTable = document.querySelector('input[name="table_id"]:checked');
+        const selectedDate = dateInput.value;
+        let selectedTime = null;
+        
+        for (const timeInput of timeInputs) {
+            if (timeInput.checked) {
+                selectedTime = timeInput.value;
+                break;
+            }
+        }
+        
+        if (!selectedDate || !selectedTime || !selectedTable) {
+            event.preventDefault();
+            alert('Veuillez sélectionner une date, une heure et une table pour effectuer votre réservation.');
+        }
+    });
+    
+    // Ajout de debug pour vérifier les événements
+    console.log("Script de réservation chargé et amélioré");
 });
-</script>
-
-
+    </script>
 @endsection

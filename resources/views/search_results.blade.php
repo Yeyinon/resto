@@ -1,266 +1,270 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('master')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Foogra - Discover & Book the best restaurants at the best price">
-    <meta name="author" content="Ansonika">
-    {{-- <title>Resto - Découvrez & Réservez</title> --}}
+@section('title', 'Resto - Découvrez & Réservez')
 
-    {{-- <!-- Favicons-->
-    <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}"> --}}
+@section('styles')
+<style>
+    /* Styles spécifiques pour cette vue */
+    .strip {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px var(--shadow-color);
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .strip:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px var(--shadow-color);
+    }
+    
+    .strip figure {
+        position: relative;
+        margin: 0;
+        overflow: hidden;
+        height: 220px;
+    }
+    
+    .strip figure img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .strip:hover figure img {
+        transform: scale(1.05);
+    }
+    
+    .strip .strip_info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .strip .strip_info small {
+        display: block;
+        color: var(--primary-light);
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .strip .item_title h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 5px 0;
+        color: white;
+    }
+    
+    .ribbon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 20px;
+        z-index: 1;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    /* Style pour la section de contenu principal */
+    main {
+        padding: 50px 0;
+        background-color: var(--background-light);
+    }
+    
+    /* Titre de section */
+    .section-title {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+    
+    .section-title h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    
+    .section-title p {
+        color: #666;
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 10px auto 0;
+    }
+    
+    /* Pour les filtres en haut de la liste des restaurants */
+    .filters-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px var(--shadow-color);
+    }
+    
+    .filter-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-right: 15px;
+    }
+    
+    .filter-btn {
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 5px 15px;
+        margin-right: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    /* Pagination */
+    .pagination-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .page-link {
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        margin: 0 5px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+    
+    .page-link:hover, .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+</style>
+@endsection
 
-
-    <!-- GOOGLE WEB FONT -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-    <link rel="preload" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap"
-        as="fetch" crossorigin="anonymous">
-    <script type="text/javascript">
-        ! function(e, n, t) {
-            "use strict";
-            var o = "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap",
-                r = "__3perf_googleFonts_c2536";
-
-            function c(e) {
-                (n.head || n.body).appendChild(e)
-            }
-
-            function a() {
-                var e = n.createElement("link");
-                e.href = o, e.rel = "stylesheet", c(e)
-            }
-
-            function f(e) {
-                if (!n.getElementById(r)) {
-                    var t = n.createElement("style");
-                    t.id = r, c(t)
-                }
-                n.getElementById(r).innerHTML = e
-            }
-            e.FontFace && e.FontFace.prototype.hasOwnProperty("display") ? (t[r] && f(t[r]), fetch(o).then(function(e) {
-                return e.text()
-            }).then(function(e) {
-                return e.replace(/@font-face {/g, "@font-face{font-display:swap;")
-            }).then(function(e) {
-                return t[r] = e
-            }).then(f).catch(a)) : a()
-        }(window, document, localStorage);
-    </script>
-    <!-- BASE CSS -->
-    <link href="{{ asset('assets-home/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets-home/css/style.css') }}" rel="stylesheet">
-    <!-- SPECIFIC CSS -->
-    <link href="{{ asset('assets-home/css/home.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets-home/css/detail-page.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
-
-    <!-- ALTERNATIVE COLORS CSS -->
-    <link href="#" id="colors" rel="stylesheet">
-    <!-- SPECIFIC CSS -->
-    <link href="{{ asset('assets-home/css/submit.css') }}" rel="stylesheet">
-</head>
-<header class="header clearfix element_to_stick" style="background-color: #0d1b2a;">
-        <div class="container">
-            <div id="logo">
-                <a href="/">
-                    <img src="{{ asset('assets-home/img/resto2.png') }}" width="100" height="30" alt=""
-                        class="logo_normal">
-                    <img src="{{ asset('assets-home/img/resto.png') }}" width="100" height="30" alt=""
-                        class="logo_sticky">
-                </a>
-            </div>
-            @guest('client')
-                <ul id="top_menu">
-                    <li><a href="{{ route('client_login_form') }}" class="login">Login</a></li>
-                    {{-- <li><a href="wishlist.html" class="wishlist_bt_top" title="Your wishlist">Your wishlist</a></li> --}}
-                </ul>
-            @endguest
-            @auth('client')
-                <ul id="top_menu" class="drop_user">
-                    <li>
-                        <div class="dropdown user clearfix">
-                            <a href="#" data-bs-toggle="dropdown">
-                                <figure><img src="{{ asset('img/client_user.png') }}" alt=""></figure>
-                                <span>{{ Auth::guard('client')->user()->name }}</span><br><br>
-                                <span>{{ Auth::guard('client')->user()->yums == 0 ? 0 : Auth::guard('client')->user()->yums }}
-                                    Yums</span>&nbsp;&nbsp;
-                            </a></br>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-menu-content">
-                                    <ul>
-
-                                        <li><a href="{{ route('client.logout') }}"><i class="icon_key"></i>Se
-                                                déconnecter</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /dropdown -->
-                    </li>
-                </ul>
-            @endauth
-            <!-- /top_menu -->
-            <a href="#0" class="open_close">
-                <i class="icon_menu"></i><span>Menu</span>
-            </a>
-            <nav class="main-menu">
-                <div id="header_menu">
-                    <a href="#0" class="open_close">
-                        <i class="icon_close"></i><span>Menu</span>
-                    </a>
-                    <a href="/"><img src="{{ asset('assets-home/img/resto2.png') }}" width="140"
-                            height="35" alt=""></a>
-                </div>
-                <ul>
-
-
-
-                    <li class="submenu">
-                        @guest('client')
-                            <a href="#0" class="show-submenu">Connexion</a>
-                            <ul>
-                                <li class="third-level"><a href="#0">Espace <strong>Client!</strong></a>
-                                    <ul>
-                                        <li><a href="{{ route('client_login_form') }}">Connexion</a></li>
-                                        <li><a href="{{ route('client.register') }}">Créer un compte</a></li>
-
-                                    </ul>
-                                </li>
-                                <li class="third-level"><a href="#0">Espace <strong>Restaurant!</strong></a>
-                                    <ul>
-                                        <li><a href="{{ route('login_form') }}">Connexion</a></li>
-                                        <li><a href="{{ route('restaurant.register') }}">Enregistrez votre restaurant</a></li>
-                                    </ul>
-                                </li>
-                                <li class="third-level"><a href="#0">Espace <strong>Admin!</strong></a>
-                                    <ul>
-                                        <li><a href="{{ route('admin_login_form') }}">Connexion</a></li>
-
-
-                                    </ul>
-                                </li>
-                            </ul>
-                        <li><a href="{{ route('restaurant.register') }}" target="_parent">Pourquoi Resto ?</a></li>
-                        <li><a href="{{ route('view_all') }}" target="_parent">Découvrez les restaurants</a></li>
-                        @endguest
-                        @auth('client')
-                        <li><a href="{{ route('client.reservations') }}" target="_parent">Mes reservations</a></li>
-                        </li>
-                    @endauth
-
-
-
-                </ul>
-            </nav>
+@section('guest')
+<!-- Hero section avec titre et description -->
+<div class="page-title-section">
+    <div class="container">
+        <h1 class="page-title">Découvrez les meilleurs restaurants</h1>
+        <div class="breadcrumb-modern">
+            <a href="/" class="breadcrumb-item">Accueil</a>
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="breadcrumb-item active">Restaurants</span>
         </div>
-    </header>
-    <main style="margin-top: 100px;">
-        <div class="container">
-            <div class="row">
-                @foreach ($restaurants as $restaurant)
-                    <div class="col-md-4">
-                        <div class="strip">
+    </div>
+</div>
+
+<!-- Contenu principal -->
+<div class="main-content">
+    <div class="container">
+        <!-- Filtres optionnels -->
+        <div class="filters-container d-flex align-items-center flex-wrap">
+            <span class="filter-title">Filtrer par:</span>
+            <button class="filter-btn active">Tous</button>
+            <button class="filter-btn">Français</button>
+            <button class="filter-btn">Italien</button>
+            <button class="filter-btn">Asiatique</button>
+            <button class="filter-btn">Avec Yums</button>
+        </div>
+        
+        <!-- Liste des restaurants -->
+        <div class="row">
+            @foreach ($restaurants as $restaurant)
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <div class="strip">
                         <figure>
                             @if($restaurant->yums > 0)
-                                <span class="ribbon off">+ {{ $restaurant->yums }} Yums</span>
+                                <span class="ribbon">+ {{ $restaurant->yums }} Yums</span>
                             @endif
 
                             @if($restaurant->image_path)
                                 <!-- Utiliser l'image téléchargée par le restaurant si disponible -->
                                 <img src="{{ asset($restaurant->image_path) }}" data-src="{{ asset($restaurant->image_path) }}"
-                                    class="owl-lazy" alt="{{ $restaurant->name }}">
+                                    class="img-fluid" alt="{{ $restaurant->name }}">
                             @else
                                 <!-- Utiliser l'image par défaut si aucune image n'a été téléchargée -->
                                 <img src="{{ asset('assets-home/img/detail_3.jpg') }}"
-                                    data-src="{{ asset('assets-home/img/home_section_1.jpg') }}" class="owl-lazy"
+                                    data-src="{{ asset('assets-home/img/home_section_1.jpg') }}" class="img-fluid"
                                     alt="{{ $restaurant->name }}">
                             @endif
 
                             <a href="client/book/{{ $restaurant->id }}" class="strip_info">
-                                <small>{{ $restaurant->name }}</small>
+                                <small>{{ $restaurant->location }}</small>
                                 <div class="item_title">
                                     <h3>{{ $restaurant->name }}</h3>
-                                    <small>{{ $restaurant->location }}</small>
+                                    <small><i class="fas fa-map-marker-alt"></i> {{ $restaurant->location }}</small>
                                 </div>
                             </a>
                         </figure>
-                        </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
-    </main>
-    <footer style="margin-top: 100px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-6">
-                    <h3 data-bs-target="#collapse_1">Liens rapides</h3>
-                    <div class="collapse dont-collapse-sm links" id="collapse_1">
-                        <ul>
-                            {{-- <li><a href="{{ route('book') }}">Êtes-vous un restaurant ? Pourquoi
-                                    soumettre à Resto?</a></li> --}}
-                            <li><a href="{{ route('restaurant.register') }}">Êtes-vous un restaurant ? Pourquoi
-                                    soumettre à Resto?</a></li>
-                            <li><a href="{{ route('view_all') }}">Découvrez les restaurants disponibles</a></li>
-                            {{-- <li><a href="help.html">Help</a></li>
-							<li><a href="account.html">My account</a></li>
-							<li><a href="blog.html">Blog</a></li>
-							<li><a href="contacts.html">Contacts</a></li> --}}
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 data-bs-target="#collapse_2">Connexion</h3>
-                    <div class="collapse dont-collapse-sm links" id="collapse_2">
-                        <ul>
-                            <li><a href="{{ route('client_login_form') }}">Client</a></li>
-                            <li><a href="{{ route('login_form') }}">Proprietaire d'un restaurant</a></li>
-                            <li><a href="{{ route('admin_login_form') }}">administrateur</a></li>
-
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h3 data-bs-target="#collapse_3">Contacts</h3>
-                    <div class="collapse dont-collapse-sm contacts" id="collapse_3">
-                        <ul>
-                        <li><i class="icon_house_alt"></i>Axel&Bryan<br>Benin</li>
-                            <li><i class="icon_mobile"></i>+2290140750121</li>
-                            <li><i class="icon_mail_alt"></i><a href="#0">restorant.application@mail.com</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    {{-- <h3 data-bs-target="#collapse_4">Keep in touch</h3> --}}
-                    <div class="collapse dont-collapse-sm" id="collapse_4">
-                        {{-- <div id="newsletter">
-							<div id="message-newsletter"></div>
-							<form method="post" action="assets/newsletter.php" name="newsletter_form" id="newsletter_form">
-								<div class="form-group">
-									<input type="email" name="email_newsletter" id="email_newsletter" class="form-control" placeholder="Your email">
-									<button type="submit" id="submit-newsletter"><i class="arrow_carrot-right"></i></button>
-								</div>
-							</form>
-						</div> --}}
-                        {{-- <div class="follow_us">
-                            <h5>Suivez-nous</h5>
-                            <ul>
-                                <li><a href="#0"><img data-src="{{ asset('assets-home/img/facebook1.svg') }}"
-                                            alt="" class="lazy"></a></li>
-                            </ul>
-                        </div> --}}
-                        <div class="follow_us"><br>
-                            <h5>© 2025 RESTO - TOUS LES DROITS SONT RÉSERVÉS</h5>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- /row-->
-            <hr>
+        
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    </footer>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+    // Script pour activer les filtres
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sélectionner tous les boutons de filtre
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        
+        // Ajouter un écouteur d'événement à chaque bouton
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Retirer la classe active de tous les boutons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                // Logique de filtrage (à implémenter avec AJAX ou JS)
+                const filterValue = this.textContent;
+                console.log('Filtrage par:', filterValue);
+                
+                // Ici vous pouvez ajouter la logique pour filtrer les restaurants
+                // ou faire une requête AJAX pour récupérer les données filtrées
+            });
+        });
+    });
+</script>
+@endsection

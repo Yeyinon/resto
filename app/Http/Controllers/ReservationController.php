@@ -96,7 +96,46 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Valider les données du formulaire
+        $validatedData = $request->validate([
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'table_id' => 'required|exists:tables,id',
+            'reservation_date' => 'required|date|date_format:Y-m-d|after_or_equal:today',
+            'reservation_time' => 'required|string',
+            'guest_number' => 'required|integer|min:1',
+            'special_requests' => 'nullable|string|max:500',
+        ]);
+
+        // Vérifier si la table est disponible à cette date et heure
+        $existingReservation = Reservation::where('table_id', $validatedData['table_id'])
+            ->where('reservation_date', $validatedData['reservation_date'])
+            ->where('reservation_time', $validatedData['reservation_time'])
+            ->exists();
+
+        if ($existingReservation) {
+            return redirect()->back()->with('error', 'Cette table est déjà réservée à cette date et heure. Veuillez choisir une autre table ou un autre horaire.');
+        }
+
+        // Vérifier si la capacité de la table est suffisante
+        $table = Table::findOrFail($validatedData['table_id']);
+        if ($table->capacity < $validatedData['guest_number']) {
+            return redirect()->back()->with('error', 'La capacité de cette table est insuffisante pour le nombre de personnes spécifié.');
+        }
+
+        // Créer la réservation
+        $reservation = new Reservation();
+        $reservation->client_id = Auth::id(); // Supposons que l'utilisateur est connecté
+        $reservation->table_id = $validatedData['table_id'];
+        $reservation->reservation_date = $validatedData['reservation_date'];
+        $reservation->reservation_time = $validatedData['reservation_time'];
+        $reservation->guest_number = $validatedData['guest_number'];
+        $reservation->special_requests = $validatedData['special_requests'];
+        $reservation->status = 'pending'; // Statut par défaut
+        $reservation->save();
+
+        // Rediriger vers la page de confirmation
+        return redirect()->route('restaurant.confirmation', $reservation->id)
+            ->with('success', 'Votre réservation a été enregistrée avec succès!');
     }
 
     /**
@@ -104,7 +143,13 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $reservation = Reservation::with(['table.restaurant'])->findOrFail($id);
+        
+        if (Auth::id() != $reservation->client_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('client.reservations.show', compact('reservation'));
     }
 
     /**
@@ -173,27 +218,25 @@ class ReservationController extends Controller
 
 public function showAvailableTables(Request $request)
 {
-    $restaurantId = $request->query('restaurant_id');
-    $date = $request->query('date');
-    $time = $request->query('time');
-
-    // Validation basique
-    if (!$restaurantId || !$date || !$time) {
-        return response()->json(['error' => 'Paramètres manquants'], 400);
-    }
-
-    // On récupère toutes les tables disponibles du restaurant
-    $tables = Table::where('restaurant_id', $restaurantId)
-        ->where('status', 'Disponible')
-        ->get();
-
-    // On vérifie les tables déjà réservées à cette date et heure
-    $reservedTableIds = Reservation::where('restaurant_id', $restaurantId)
-        ->where('reservation_date', $date)
-        ->where('reservation_time', $time)
-        ->pluck('table_id')
-        ->toArray();
-
+    $request->validate([
+        'restaurant_id' => 'required|integer',
+        'date' => 'required|date',
+        'time' => 'required|string',
+    ]);
+    
+    $restaurantId = $request->restaurant_id;
+    $date = $request->date;
+    $time = $request->time;
+    
+    // Récupérer toutes les tables du restaurant
+    $tables = Table::where('restaurant_id', $restaurantId)->get();
+    
+    // Récupérer les tables déjà réservées à cette date et heure
+    $reservedTableIds = Reservation::where('reservation_date', $date)
+                               ->where('reservation_time', $time)
+                               ->pluck('table_id')
+                               ->toArray();
+    
     return response()->json([
         'tables' => $tables,
         'reservées' => $reservedTableIds

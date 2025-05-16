@@ -9,44 +9,43 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-
     protected $fillable = [
-
         'client_id',
-        'restaurant_id',
         'table_id',
+        'restaurant_id',         // Added restaurant_id
         'reservation_date',
         'reservation_time',
-        'reservation_email',
-        'reservation_tele',
+        'reservation_tele',      // Added missing field
+        'reservation_email',     // Added missing field
+        'guest_number',
+        'special_requests',
         'status'
     ];
 
-
+    protected $casts = [
+        'reservation_date' => 'date'
+    ];
 
     public function client()
     {
-        return $this->belongsTo(Client::class, 'client_id', );
+        return $this->belongsTo(Client::class);
     }
-
 
     public function table()
     {
-        return $this->belongsTo(Table::class, 'table_id');
+        return $this->belongsTo(Table::class);
     }
 
-
-
+    // Méthode pour accéder directement au restaurant via la table
     public function restaurant()
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->hasOneThrough(
+            Restaurant::class,
+            Table::class,
+            'id', // Clé étrangère sur la table "tables"
+            'id', // Clé primaire sur la table "restaurants"
+            'table_id', // Clé étrangère locale sur la table "reservations"
+            'restaurant_id' // Clé étrangère locale sur la table "tables"
+        );
     }
-
-
-
 }

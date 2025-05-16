@@ -205,5 +205,7 @@ Route::get('/confidentialite', function () {
 
 Route::post('/webhook/fedapay', [App\Http\Controllers\WebhookController::class, 'handle']);
 
+Route::get('/api/available-tables', [ReservationController::class, 'showAvailableTables'])
+    ->name('api.available-tables');
 
 require __DIR__ . '/auth.php';

@@ -38,47 +38,63 @@ class ClientController extends Controller
     public function reservations(Request $request)
     {
         $client = Auth::guard('client')->user();
-        $reservations = Reservation::where('client_id', $client->id)->get();
+        $reservations = Reservation::where('client_id', $client->id)
+            ->orderBy('reservation_date', 'desc')
+            ->orderBy('reservation_time', 'desc')
+            ->get();
         return view('client.mybooking', ['reservations' => $reservations]);
     }
 
     public function reserve(Request $request)
-    {
-        $table = Table::with('restaurant')->findOrFail($request->table_id);
+{
+    // Debug the incoming request data
+    \Log::debug('Reservation request data:', $request->all());
+    
+    $table = Table::with('restaurant')->findOrFail($request->table_id);
 
-        $existingReservation = Reservation::where('table_id', $table->id)
-            ->where('reservation_date', $request->reservation_date)
-            ->where('reservation_time', $request->reservation_time)
-            ->first();
+    $existingReservation = Reservation::where('table_id', $table->id)
+        ->where('reservation_date', $request->reservation_date)
+        ->where('reservation_time', $request->reservation_time)
+        ->first();
 
-        if ($existingReservation) {
-            return redirect()->back()->with('error', 'La table est déjà réservée à cette date et heure.');
-        }
-
-        $client = Client::findOrFail($request->client_id);
-
-        // 🔥 On récupère automatiquement le restaurant associé à la table
-        $restaurant = $table->restaurant;
-
-        // Ajout des yums
-        $client->yums += $restaurant->yums;
-        $client->save();
-
-        // 💡 Création de la réservation AVEC le restaurant récupéré automatiquement
-        $reservation = Reservation::create([
-            'client_id' => $client->id,
-            'table_id' => $table->id,
-            'reservation_tele' => $request->reservation_tele,
-            'reservation_email' => $request->reservation_email,
-            'reservation_date' => $request->reservation_date,
-            'reservation_time' => $request->reservation_time,
-            'restaurant_id' => $restaurant->id, // Auto
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return redirect()->route('client.reservation.confirmation', ['reservation' => $reservation->id]);
+    if ($existingReservation) {
+        return redirect()->back()->with('error', 'La table est déjà réservée à cette date et heure.');
     }
+
+    $client = Client::findOrFail($request->client_id);
+
+    // On récupère automatiquement le restaurant associé à la table
+    $restaurant = $table->restaurant;
+
+    // Ajout des yums
+    $client->yums += $restaurant->yums;
+    $client->save();
+
+    // Validation explicite de tous les champs requis
+    $validated = $request->validate([
+        'reservation_tele' => 'required|string|max:255',
+        'reservation_email' => 'required|email',
+        'reservation_date' => 'required|date',
+        'reservation_time' => 'required',
+        'table_id' => 'required|exists:tables,id',
+        'client_id' => 'required|exists:clients,id',
+    ]);
+
+    // Création de la réservation avec tous les champs explicitement mentionnés
+    $reservation = Reservation::create([
+        'client_id' => $client->id,
+        'table_id' => $table->id,
+        'restaurant_id' => $restaurant->id, 
+        'reservation_tele' => $request->reservation_tele, // Assurez-vous que cette valeur est présente
+        'reservation_email' => $request->reservation_email,
+        'reservation_date' => $request->reservation_date,
+        'reservation_time' => $request->reservation_time,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->route('client.reservation.confirmation', ['reservation' => $reservation->id]);
+}
 
 
     public function clients()

@@ -1,204 +1,374 @@
-@extends('client.master')
 
-@section('client')
+@extends('master')
+
+@section('guest')
 <title>Resto - Mon Panier</title>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<!-- Page Title Section -->
+<div class="page-title-section">
+    <div class="container">
+        <h1 class="page-title">Mon Panier</h1>
+        <div class="breadcrumb-modern">
+            <a href="/" class="breadcrumb-item">Accueil</a>
+            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="breadcrumb-item active">Panier</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="container-custom">
+        @if(count($cart) > 0)
+            <div class="cart-items">
+                @foreach ($cart as $menu)
+                    <div class="content-card cart-item">
+                        <div class="cart-item-header">
+                            <i class="fas fa-utensils"></i>
+                            <h3>{{ $menu['nom'] }}</h3>
+                        </div>
+                        <div class="cart-item-content">
+                            <div class="cart-quantity">
+                                <span class="quantity-label">Quantité</span>
+                                <span class="quantity-value">{{ $menu['quantité'] }}</span>
+                            </div>
+                            
+                            <div class="plat-list">
+                                @foreach ($menu['plats'] as $plat)
+                                    <div class="plat-item">
+                                        <div class="plat-info">
+                                            <i class="fas fa-leaf"></i>
+                                            <span>{{ $plat->nom }}</span>
+                                        </div>
+                                        <div class="plat-price">{{ number_format($plat->prix, 0, ',', ' ') }} XOF</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            @php
+                $serviceFee = $total * 0.1;
+                $grandTotal = $total + $serviceFee;
+            @endphp
+
+            <div class="content-card payment-section">
+                <div class="payment-header">
+                    <h2>Récapitulatif de la commande</h2>
+                </div>
+                
+                <div class="payment-details">
+                    <div class="fee-item">
+                        <span>Sous-total</span>
+                        <span>{{ number_format($total, 0, ',', ' ') }} XOF</span>
+                    </div>
+                    <div class="fee-item">
+                        <span>Frais de service (10%)</span>
+                        <span>{{ number_format($serviceFee, 0, ',', ' ') }} XOF</span>
+                    </div>
+                    <div class="fee-item total">
+                        <span>Total</span>
+                        <span>{{ number_format($grandTotal, 0, ',', ' ') }} XOF</span>
+                    </div>
+                </div>
+                
+                <div class="payment-form">
+                    <h3>Informations de paiement</h3>
+                    <form action="{{ route('fedapay.pay') }}" method="POST" id="payment-form">
+                        @csrf
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <input type="text" name="firstname" class="form-control-custom" placeholder="Prénom" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="lastname" class="form-control-custom" placeholder="Nom" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" name="email" class="form-control-custom" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="phone" class="form-control-custom" placeholder="Téléphone (ex: 97000000)" required>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="amount" value="{{ $grandTotal }}">
+
+                        <button type="submit" class="btn-primary-custom payment-button">
+                            <span class="spinner"></span>
+                            <span class="button-text">Payer</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @else
+            <div class="content-card empty-cart">
+                <div class="empty-cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>Votre panier est vide</h3>
+                <p>Explorez nos restaurants et ajoutez des plats à votre panier.</p>
+                <a href="{{ route('view_all') }}" class="btn-primary-custom">
+                    <i class="fas fa-utensils"></i> Découvrir les restaurants
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
 
 <style>
-    .cart-container {
-        padding: 50px 0;
-    }
-    .cart-card {
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    /* Styles pour la page du panier */
+    .cart-items {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
         margin-bottom: 30px;
-        transition: transform 0.3s, box-shadow 0.3s;
-        background: #ffffff;
-        animation: fadeIn 0.6s ease forwards;
     }
-    .cart-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+    .cart-item {
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .cart-header {
-        background: linear-gradient(135deg, #2e7d32, #66bb6a);
+
+    .cart-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .cart-item-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         color: white;
-        padding: 25px;
-        font-size: 1.6rem;
-        font-weight: bold;
-        text-align: center;
+        padding: 15px 25px;
         display: flex;
         align-items: center;
-        justify-content: center;
+        gap: 15px;
+    }
+
+    .cart-item-header i {
+        font-size: 1.5rem;
+    }
+
+    .cart-item-header h3 {
+        margin: 0;
+        font-weight: 600;
+        color: white;
+    }
+
+    .cart-item-content {
+        padding: 20px 25px;
+    }
+
+    .cart-quantity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .quantity-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .quantity-value {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+
+    .plat-list {
+        display: flex;
+        flex-direction: column;
         gap: 10px;
     }
-    .cart-body {
-        padding: 25px;
+
+    .plat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background-color: var(--background-light);
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
     }
-    .list-group-item {
-        background: #f1f8e9;
-        border: none;
-        margin-bottom: 8px;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: background 0.3s;
+
+    .plat-item:hover {
+        background-color: var(--primary-light);
     }
-    .list-group-item:hover {
-        background: #dcedc8;
+
+    .plat-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    .badge-plat {
-        background: linear-gradient(135deg, #388e3c, #81c784);
-        color: white;
-        border-radius: 30px;
+
+    .plat-info i {
+        color: var(--primary-color);
+    }
+
+    .plat-price {
+        font-weight: 600;
+        color: var(--primary-color);
         padding: 5px 15px;
-        font-size: 0.9rem;
-        font-weight: bold;
-    }
-    .total-section {
-        background: linear-gradient(135deg, #1b5e20, #388e3c);
-        color: white;
+        background-color: white;
         border-radius: 20px;
-        padding: 40px;
-        text-align: center;
-        margin-top: 40px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-        animation: fadeIn 0.8s ease forwards;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     }
-    .total-section h1, .total-section h2, .total-section p {
-        color: white;
+
+    /* Payment Section */
+    .payment-section {
+        margin-top: 30px;
     }
-    .pay-btn {
-        background: #43a047;
-        border: none;
-        padding: 15px 40px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        border-radius: 50px;
-        color: white;
-        margin-top: 20px;
-        transition: background 0.3s;
+
+    .payment-header {
+        margin-bottom: 25px;
+    }
+
+    .payment-header h2 {
+        color: var(--text-dark);
+        font-weight: 600;
         position: relative;
+        padding-bottom: 12px;
     }
-    .pay-btn:hover {
-        background: #388e3c;
+
+    .payment-header h2:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 3px;
     }
-    .pay-btn[disabled] {
-        opacity: 0.7;
-        cursor: not-allowed;
+
+    .payment-details {
+        background-color: var(--background-light);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
     }
+
+    .fee-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+
+    .fee-item:last-child {
+        border-bottom: none;
+    }
+
+    .fee-item.total {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-top: 10px;
+    }
+
+    .payment-form {
+        margin-top: 30px;
+    }
+
+    .payment-form h3 {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: var(--text-dark);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--background-light);
+        transition: all 0.2s ease;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
+        outline: none;
+    }
+
+    .payment-button {
+        position: relative;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        justify-content: center;
+    }
+
     .spinner {
         display: none;
         width: 20px;
         height: 20px;
-        border: 3px solid #fff;
+        border: 3px solid white;
         border-top: 3px solid transparent;
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        position: absolute;
-        top: 50%;
-        left: 15px;
-        transform: translateY(-50%);
+        margin-right: 10px;
     }
+
     @keyframes spin {
-        0% { transform: translateY(-50%) rotate(0deg); }
-        100% { transform: translateY(-50%) rotate(360deg); }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
-    .input-group-custom input {
-        border-radius: 10px;
-        padding: 12px;
-        background-color: #e0e0e0;
-        border: none;
+
+    /* Empty Cart */
+    .empty-cart {
+        text-align: center;
+        padding: 50px 20px;
     }
-    .input-group-custom input:focus {
-        background-color: #d0d0d0;
-        box-shadow: none;
+
+    .empty-cart-icon {
+        font-size: 4rem;
+        color: var(--primary-light);
+        margin-bottom: 20px;
     }
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(30px);}
-        to {opacity: 1; transform: translateY(0);}
+
+    .empty-cart h3 {
+        color: var(--text-dark);
+        margin-bottom: 15px;
+    }
+
+    .empty-cart p {
+        color: #64748b;
+        margin-bottom: 30px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="container cart-container">
-    <h1 class="text-center text-success mb-5">🛒 Mon Panier</h1>
-
-    @if(count($cart) > 0)
-        @foreach ($cart as $menu)
-            <div class="cart-card">
-                <div class="cart-header">
-                    <i class="fas fa-utensils"></i> {{ $menu['nom'] }}
-                </div>
-                <div class="cart-body">
-                    <p><strong>Quantité :</strong> {{ $menu['quantité'] }}</p>
-
-                    <ul class="list-group mb-3">
-                        @foreach ($menu['plats'] as $plat)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-leaf text-success me-2"></i> {{ $plat->nom }}
-                                </div>
-                                <span class="badge-plat">{{ number_format($plat->prix, 0, ',', ' ') }} XOF</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endforeach
-
-        @php
-            $serviceFee = $total * 0.1;
-            $grandTotal = $total + $serviceFee;
-        @endphp
-
-        <div class="total-section">
-            <h2>Total à payer</h2>
-            <h1>{{ number_format($grandTotal, 0, ',', ' ') }} XOF</h1>
-
-            <form action="{{ route('fedapay.pay') }}" method="POST" id="payment-form" class="mt-4">
-                @csrf
-                <div class="row input-group-custom">
-                    <div class="col-md-3 mb-3">
-                        <input type="text" name="firstname" class="form-control" placeholder="Prénom" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <input type="text" name="lastname" class="form-control" placeholder="Nom" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <input type="email" name="email" class="form-control" placeholder="Email" required>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <input type="text" name="phone" class="form-control" placeholder="Téléphone (ex: 97000000)" required>
-                    </div>
-                </div>
-
-                <input type="hidden" name="amount" value="{{ $grandTotal }}">
-
-                <button type="submit" class="pay-btn">
-                    <div class="spinner" id="spinner"></div>
-                    <span id="btn-text">Payer avec FedaPay</span>
-                </button>
-            </form>
-        </div>
-    @else
-        <div class="alert alert-info text-center">
-            Votre panier est vide.
-        </div>
-    @endif
-</div>
-
-<!-- Script pour activer le Loading -->
 <script>
-    document.getElementById('payment-form').addEventListener('submit', function(e) {
-        var btn = e.target.querySelector('.pay-btn');
-        var spinner = btn.querySelector('#spinner');
-        var btnText = btn.querySelector('#btn-text');
-
-        btn.disabled = true;
-        spinner.style.display = 'inline-block';
-        btnText.textContent = 'Traitement...';
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('payment-form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const button = this.querySelector('.payment-button');
+                const spinner = button.querySelector('.spinner');
+                const buttonText = button.querySelector('.button-text');
+                
+                button.disabled = true;
+                spinner.style.display = 'inline-block';
+                buttonText.textContent = 'Traitement en cours...';
+            });
+        }
     });
 </script>
 @endsection

@@ -1,128 +1,232 @@
-@extends('client.master')
+@extends('master')
 
-@section('client')
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+@section('guest')
+    <!-- Page Title Section -->
+    <div class="page-title-section">
+        <div class="container">
+            <h1 class="page-title">{{ $restaurant->name }}</h1>
+            <div class="breadcrumb-modern">
+                <a href="/" class="breadcrumb-item">Accueil</a>
+                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+                <a href="{{ route('view_all') }}" class="breadcrumb-item">Restaurants</a>
+                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
+                <span class="breadcrumb-item active">Menu</span>
+            </div>
+        </div>
+    </div>
 
-        body {
-            background-color: #f0fdf4;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        h1, h2, h5 {
-            color: #065f46;
-        }
-
-        .menu-title {
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #10b981;
-            display: inline-block;
-            margin-bottom: 1rem;
-        }
-
-        .menu-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .menu-card img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            border-bottom: 2px solid #d1fae5;
-        }
-
-        .menu-card .card-body {
-            padding: 20px;
-        }
-
-        .menu-card h5 {
-            font-weight: 600;
-        }
-
-        .price {
-            color: #10b981;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .form-control {
-            border-radius: 8px;
-        }
-
-        .btn-add {
-            background-color: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-add:hover {
-            background-color: #0e9b72;
-        }
-
-        .btn-cart {
-            background-color: #065f46;
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-cart:hover {
-            background-color: #064e3b;
-        }
-    </style>
-
-    <div class="container py-5">
-        <h1 class="text-center menu-title mb-5">Menu du restaurant {{ $restaurant->name }}</h1>
-
-        @foreach ($menus as $menu)
-            <div class="mb-5">
-                <h2 class="mb-4">{{ $menu->nom }}</h2>
-                <div class="row">
-                    @forelse ($menu->plats as $plat)
-                        <div class="col-md-4 mb-4">
-                            <div class="menu-card h-100">
-                                <img src="{{ asset('storage/' . $plat->photo) }}" alt="{{ $plat->nom }}">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="mb-1">{{ $plat->nom }}</h5>
-                                    <p class="text-muted mb-2">{{ $plat->description }}</p>
-                                    <p class="price mb-3">XOF {{ $plat->prix }}</p>
-                                    <form action="{{ route('client.cart.add') }}" method="POST" class="mt-auto">
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-custom">
+            @foreach ($menus as $menu)
+                <div class="content-card mb-5">
+                    <h2 class="menu-category">{{ $menu->nom }}</h2>
+                    <div class="menu-grid">
+                        @forelse ($menu->plats as $plat)
+                            <div class="dish-card">
+                                <div class="dish-image">
+                                    <img src="{{ asset('storage/' . $plat->photo) }}" alt="{{ $plat->nom }}">
+                                </div>
+                                <div class="dish-content">
+                                    <h3>{{ $plat->nom }}</h3>
+                                    <p class="dish-description">{{ $plat->description }}</p>
+                                    <div class="dish-price">XOF {{ $plat->prix }}</div>
+                                    <form action="{{ route('client.cart.add') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="menu_id" value="{{ $menu->id }}">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="number" name="quantity" value="1" min="1"
-                                                class="form-control" style="width: 80px;">
-                                            <button type="submit" class="btn btn-add">Ajouter +</button>
+                                        <div class="dish-actions">
+                                            <div class="quantity-control">
+                                                <input type="number" name="quantity" value="1" min="1" class="quantity-input">
+                                            </div>
+                                            <button type="submit" class="btn-add-cart">
+                                                <i class="fas fa-plus"></i> Ajouter
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <p class="text-muted">Aucun plat pour ce menu.</p>
-                    @endforelse
+                        @empty
+                            <div class="empty-menu">
+                                <i class="fas fa-utensils empty-icon"></i>
+                                <p>Aucun plat disponible pour ce menu.</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
 
-        <div class="text-center mt-5">
-            <a href="{{ route('client.cart.show') }}" class="btn-cart">🛒 Voir mon panier</a>
+            <div class="cart-action">
+                <a href="{{ route('client.cart.show') }}" class="btn-primary-custom">
+                    <i class="fas fa-shopping-cart"></i> Voir mon panier
+                </a>
+            </div>
         </div>
     </div>
+
+    <style>
+        /* Menu Page Styles */
+        .menu-category {
+            color: var(--primary-dark);
+            font-weight: 700;
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 0.8rem;
+        }
+
+        .menu-category:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            border-radius: 2px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 2rem;
+        }
+
+        .dish-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px var(--shadow-color);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dish-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .dish-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .dish-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .dish-card:hover .dish-image img {
+            transform: scale(1.05);
+        }
+
+        .dish-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dish-content h3 {
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .dish-description {
+            color: #4b5563;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .dish-price {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .dish-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-input {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-add-cart {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .btn-add-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .empty-menu {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .cart-action {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .cart-action .btn-primary-custom {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 @endsection
