@@ -20,34 +20,33 @@
 <div class="main-content">
     <div class="container-custom">
         @if(count($cart) > 0)
-            <div class="cart-items">
-                @foreach ($cart as $menu)
-                    <div class="content-card cart-item">
-                        <div class="cart-item-header">
-                            <i class="fas fa-utensils"></i>
-                            <h3>{{ $menu['nom'] }}</h3>
-                        </div>
-                        <div class="cart-item-content">
-                            <div class="cart-quantity">
-                                <span class="quantity-label">Quantité</span>
-                                <span class="quantity-value">{{ $menu['quantité'] }}</span>
-                            </div>
-                            
-                            <div class="plat-list">
-                                @foreach ($menu['plats'] as $plat)
-                                    <div class="plat-item">
-                                        <div class="plat-info">
-                                            <i class="fas fa-leaf"></i>
-                                            <span>{{ $plat->nom }}</span>
-                                        </div>
-                                        <div class="plat-price">{{ number_format($plat->prix, 0, ',', ' ') }} XOF</div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+        <div class="cart-items">
+    @foreach ($cart as $menu)
+        <div class="content-card cart-item">
+            <div class="cart-item-header">
+                <i class="fas fa-utensils"></i>
+                <h3>{{ $menu['name'] }}</h3>
             </div>
+            <div class="cart-item-content">
+                <div class="cart-quantity">
+                    <span class="quantity-label">Quantité</span>
+                    <span class="quantity-value">{{ $menu['quantity'] }}</span>
+                </div>
+                
+                <div class="plat-list">
+                    <div class="plat-item">
+                        <div class="plat-info">
+                            <i class="fas fa-leaf"></i>
+                            <span>{{ $menu['name'] }}</span>
+                        </div>
+                        <div class="plat-price">{{ number_format($menu['price'], 0, ',', ' ') }} XOF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
+
 
             @php
                 $serviceFee = $total * 0.1;

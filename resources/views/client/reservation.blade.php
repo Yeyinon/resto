@@ -42,29 +42,27 @@
 
                     <!-- Menu du restaurant -->
                     <div class="content-card">
-                        <div class="menu-section">
-                            <h3><i class="fas fa-utensils"></i> Menu du restaurant</h3>
-                            
-                            @if(isset($plats) && count($plats) > 0)
-                                <div class="menu-items">
-                                    @foreach($plats as $plat)
-                                    <div class="menu-item">
-                                        <div class="menu-item-details">
-                                            <h4>{{ $plat->name }}</h4>
-                                            <p>{{ $plat->description }}</p>
-                                            <span class="menu-item-price">{{ $plat->price }} €</span>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="menu-empty">
-                                    <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
-                                </div>
-                            @endif
-                        </div>
+                    <div class="menu-section">
+                        <h3><i class="fas fa-utensils"></i> Menu du restaurant</h3>
+                        
+                        @if(isset($menus) && $menus->count() > 0)
+                            <div class="menu-items">
+                                @foreach($menus as $menu)
+                                    <h4>{{ $menu->name }}</h4>
+                                    <ul>
+                                        @foreach($menu->plats as $plat)
+                                            <li>{{ $plat->name }} - {{ number_format($plat->price, 2) }} €</li>
+                                        @endforeach
+                                    </ul>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="menu-empty">
+                                <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
+                            </div>
+                        @endif
                     </div>
-
+                </div>
                     <!-- Section commentaires -->
                     <div class="content-card">
                         <div class="comment-section">

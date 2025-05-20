@@ -1,6 +1,6 @@
-@extends('client.master')
+@extends('master')
 
-@section('client')
+@section('guest')
 <title>Resto- Confidentialité</title>
 <div class="container py-5">
     <div class="bg-white shadow rounded p-4 md:p-6">

@@ -33,8 +33,8 @@
                                     <div class="dish-price">XOF {{ $plat->prix }}</div>
                                     <form action="{{ route('client.cart.add') }}" method="POST">
                                         @csrf
-                                        <input type="hidden" name="menu_id" value="{{ $menu->id }}">
-                                        <div class="dish-actions">
+                                        <input type="hidden" name="plat_id" value="{{ $plat->id }}">
+                                                <div class="dish-actions">
                                             <div class="quantity-control">
                                                 <input type="number" name="quantity" value="1" min="1" class="quantity-input">
                                             </div>

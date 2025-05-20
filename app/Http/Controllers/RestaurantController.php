@@ -262,38 +262,27 @@ class RestaurantController extends Controller
     }
 
     public function showMenu($id)
-    {
-        // Récupérer le restaurant
-        $restaurant = Restaurant::findOrFail($id);
-        
-        // Récupérer le nombre de tables
-        $tableCount = Table::where('restaurant_id', $id)->count();
-        
-        // Récupérer les commentaires associés à ce restaurant
-        $comments = Comment::with('client')
-                          ->where('restaurant_id', $id)
-                          ->orderBy('created_at', 'desc')
-                          ->get();
-        
-        // Récupérer les menus pour ce restaurant
-        $menus = Menu::where('restaurant_id', $id)
-                     ->get();
-        
-        // Récupérer les plats pour chaque menu
-        $plats = [];
-        foreach ($menus as $menu) {
-            $plats[$menu->id] = Plat::where('menu_id', $menu->id)
-                                    ->get();
-        }
-        
-        return view('client.restaurant.detail', compact(
-            'restaurant', 
-            'tableCount', 
-            'comments', 
-            'menus', 
-            'plats'
-        ));
-    }
+{
+    $restaurant = Restaurant::with(['menus.plats'])->findOrFail($id);
+    
+    $tableCount = Table::where('restaurant_id', $id)->count();
+
+    $comments = Comment::with('client')
+                      ->where('restaurant_id', $id)
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+
+    // Les menus avec leurs plats sont déjà chargés
+    $menus = $restaurant->menus;
+
+    return view('client.restaurant.detail', compact(
+        'restaurant',
+        'tableCount',
+        'comments',
+        'menus'
+    ));
+}
+
 
     public function getAvailableTables(Request $request)
     {

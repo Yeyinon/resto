@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Menu;
+use App\Models\Plat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use FedaPay\FedaPay;
@@ -10,35 +10,41 @@ use FedaPay\Transaction;
 
 class CartController extends Controller
 {
-    // Ajouter un menu au panier
+    // Ajouter un plat au panier
     public function add(Request $request)
     {
-        $menuId = $request->input('menu_id');
+        $platId = $request->input('plat_id');
         $quantity = $request->input('quantity', 1);
 
-        $menu = Menu::with('plats')->findOrFail($menuId);
+        $plat = Plat::findOrFail($platId);
 
         $cart = session()->get('cart', []);
 
-        $cart[$menuId] = [
-            'id' => $menu->id,
-            'nom' => $menu->nom,
-            'plats' => $menu->plats,
-            'quantité' => $quantity,
-            'prix' => $menu->plats->sum('prix') * $quantity,
-        ];
+        $found = false;
+
+        foreach ($cart as &$item) {
+            if ($item['id'] == $plat->id) {
+                $item['quantity'] += $quantity;
+                $item['total'] = $item['quantity'] * $item['price'];
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $cart[] = [
+                'id' => $plat->id,
+                'name' => $plat->nom,
+                'price' => $plat->prix,
+                'photo' => $plat->photo,
+                'quantity' => $quantity,
+                'total' => $plat->prix * $quantity,
+            ];
+        }
 
         session()->put('cart', $cart);
 
-        // 🔁 Rediriger vers la page précédente avec message
-        return redirect()->back()->with('success', 'Menu ajouté au panier avec succès !');
-    }
-
-    // Valider le panier et rediriger vers la page de paiement
-    public function checkout()
-    {
-        // Logique pour vérifier le panier et rediriger vers une page de paiement
-        return redirect()->route('payment.page'); // Exemple, à adapter selon ta plateforme de paiement
+        return redirect()->back()->with('success', 'Plat ajouté au panier avec succès !');
     }
 
     public function show()
@@ -46,23 +52,28 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $total = 0;
 
-        foreach ($cart as $menu) {
-            $total += $menu['prix'];
+        foreach ($cart as $item) {
+            $total += $item['total'];
         }
 
         return view('client.cart', compact('cart', 'total'));
     }
 
+    public function checkout()
+    {
+        return redirect()->route('payment.page');
+    }
+
     public function payWithFedaPay(Request $request)
     {
-        FedaPay::setEnvironment(config('services.fedapay.environment')); // sandbox ou live
+        FedaPay::setEnvironment(config('services.fedapay.environment'));
         FedaPay::setApiKey(config('services.fedapay.secret_key'));
 
         $cart = session()->get('cart', []);
         $subtotal = 0;
 
-        foreach ($cart as $menu) {
-            $subtotal += $menu['prix'];
+        foreach ($cart as $item) {
+            $subtotal += $item['total'];
         }
 
         $fee = $subtotal * 0.02;
@@ -93,4 +104,17 @@ class CartController extends Controller
         }
     }
 
+    public function remove($id)
+    {
+        $cart = session()->get('cart', []);
+        $cart = array_filter($cart, fn($item) => $item['id'] != $id);
+        session()->put('cart', $cart);
+        return redirect()->back()->with('success', 'Plat retiré du panier.');
+    }
+
+    public function clear()
+    {
+        session()->forget('cart');
+        return redirect()->back()->with('success', 'Panier vidé.');
+    }
 }

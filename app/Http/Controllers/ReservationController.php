@@ -6,6 +6,8 @@ use App\Models\Restaurant;
 use App\Models\Reservation;
 use App\Models\Client;
 use App\Models\Table;
+use App\Models\Menu; // Ajout de l'import pour Menu
+use App\Models\Comment; // Ajout de l'import pour Comment
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -13,18 +15,33 @@ use App\Mail\ReservationStatusMail;
 
 class ReservationController extends Controller
 {
-    public function pending(Request $request)
-    {
-        $restaurant = Restaurant::find($request->id);
-        $reservations = Reservation::with('client', 'table')
-            ->where('status', 'pending') // Afficher uniquement les réservations en attente
-            ->whereHas('table', function ($query) use ($restaurant) {
-                $query->where('restaurant_id', $restaurant->id);
-            })
-            ->get();
+    public function showReservationPage(Request $request, $restaurant_id)
+{
+    // Récupérer le restaurant avec ses menus et plats
+    $restaurant = Restaurant::findOrFail($restaurant_id);
+    
+    // Charger explicitement les menus et les plats associés
+    $menus = Menu::with('plats')
+                ->where('restaurant_id', $restaurant_id)
+                ->get();
+    
+    // Compter le nombre de tables
+    $tableCount = Table::where('restaurant_id', $restaurant_id)->count();
 
-        return view('restaurant.reservations', compact('reservations', 'restaurant'));
-    }
+    // Récupérer les commentaires
+    $comments = Comment::with('client')
+                      ->where('restaurant_id', $restaurant_id)
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+
+    // Renvoyer la vue avec toutes les données nécessaires
+    return view('client.reservation', compact(
+        'restaurant',
+        'tableCount',
+        'comments',
+        'menus'
+    ));
+}
 
     /**
      * Approuver une réservation.
