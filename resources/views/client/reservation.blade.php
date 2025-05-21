@@ -46,21 +46,21 @@
                         <h3><i class="fas fa-utensils"></i> Menu du restaurant</h3>
                         
                         @if(isset($menus) && $menus->count() > 0)
-                            <div class="menu-items">
-                                @foreach($menus as $menu)
-                                    <h4>{{ $menu->name }}</h4>
-                                    <ul>
-                                        @foreach($menu->plats as $plat)
-                                            <li>{{ $plat->name }} - {{ number_format($plat->price, 2) }} €</li>
-                                        @endforeach
-                                    </ul>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="menu-empty">
-                                <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
-                            </div>
-                        @endif
+    <div class="menu-items">
+        @foreach($menus as $menu)
+            <h4>{{ $menu->name }}</h4>
+            <ul>
+                @foreach($menu->plats as $plat)
+                    <li>{{ $plat->name }} - {{ number_format($plat->price, 2) }} €</li>
+                @endforeach
+            </ul>
+        @endforeach
+    </div>
+@else
+    <div class="menu-empty">
+        <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
+    </div>
+@endif
                     </div>
                 </div>
                     <!-- Section commentaires -->

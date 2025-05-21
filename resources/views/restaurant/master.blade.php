@@ -316,7 +316,7 @@
             <!-- En-tête -->
             <header class="header">
                 <div class="search-bar">
-                    <i class="fas fa-search"></i>
+                    <a href="#"><i class="fas fa-search"></i></a>
                     <input type="text" placeholder="Rechercher...">
                 </div>
                 <div class="user-section">

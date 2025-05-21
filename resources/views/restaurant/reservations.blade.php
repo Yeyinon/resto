@@ -32,6 +32,36 @@
 
                 <div class="reservations-divider"></div>
 
+                <!-- Système d'onglets pour filtrer les réservations -->
+                <div class="reservation-tabs">
+                    <div class="tab-navigation">
+                        <a href="{{ route('restaurant.reservations', ['status' => 'pending', 'date' => 'upcoming', 'archived' => false]) }}" 
+                            class="tab-link {{ $statusFilter == 'pending' && $dateFilter == 'upcoming' && !$archived ? 'active' : '' }}">
+                            <i class="fas fa-clock"></i> En attente 
+                            <span class="badge">{{ $counts['pending'] }}</span>
+                        </a>
+                        <a href="{{ route('restaurant.reservations', ['status' => 'approved', 'date' => 'upcoming', 'archived' => false]) }}" 
+                            class="tab-link {{ $statusFilter == 'approved' && $dateFilter == 'upcoming' && !$archived ? 'active' : '' }}">
+                            <i class="fas fa-check-circle"></i> Approuvées 
+                            <span class="badge">{{ $counts['approved'] }}</span>
+                        </a>
+                        <a href="{{ route('restaurant.reservations', ['status' => 'rejected', 'date' => 'all', 'archived' => false]) }}" 
+                            class="tab-link {{ $statusFilter == 'rejected' && !$archived ? 'active' : '' }}">
+                            <i class="fas fa-times-circle"></i> Rejetées 
+                            <span class="badge">{{ $counts['rejected'] }}</span>
+                        </a>
+                        <a href="{{ route('restaurant.reservations', ['status' => 'all', 'date' => 'past', 'archived' => false]) }}" 
+                            class="tab-link {{ $dateFilter == 'past' && !$archived ? 'active' : '' }}">
+                            <i class="fas fa-history"></i> Passées
+                        </a>
+                        <a href="{{ route('restaurant.reservations', ['status' => 'all', 'date' => 'all', 'archived' => true]) }}" 
+                            class="tab-link {{ $archived ? 'active' : '' }}">
+                            <i class="fas fa-archive"></i> Archives 
+                            <span class="badge">{{ $counts['archived'] }}</span>
+                        </a>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="data-table" id="dataTable" width="100%" cellspacing="0">
                         <thead>
@@ -43,40 +73,68 @@
                                 <th>Téléphone</th>
                                 <th>Date</th>
                                 <th>Heure</th>
+                                <th>Statut</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($reservations as $reservation)
+                            @if(count($reservations) > 0)
+                                @foreach($reservations as $reservation)
+                                    <tr>
+                                        <td>{{ $reservation->table->number }}</td>
+                                        <td class="location">{{ $reservation->table->location }}</td>
+                                        <td class="prenom-client">{{ $reservation->client->name ?? 'Client inconnu' }}</td>
+                                        <td>{{ $reservation->client->email ?? 'Email inconnu' }}</td>
+                                        <td>{{ $reservation->reservation_tele ?? 'N/A' }}</td>
+                                        <td class="date">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d/m/Y') }}</td>
+                                        <td>{{ $reservation->reservation_time }}</td>
+                                        <td>
+                                            @if($reservation->status == 'pending')
+                                                <span class="status-badge pending">En attente</span>
+                                            @elseif($reservation->status == 'approved')
+                                                <span class="status-badge approved">Approuvée</span>
+                                            @elseif($reservation->status == 'rejected')
+                                                <span class="status-badge rejected">Rejetée</span>
+                                            @endif
+                                        </td>
+                                        <td class="actions-cell">
+                                            @if($reservation->status == 'pending')
+                                                <form action="{{ route('restaurant.reservation.approve', $reservation->id) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn-action approve">
+                                                        <i class="fas fa-check"></i> Approuver
+                                                    </button>
+                                                </form>
+                                                <button type="button" class="btn-action reject"
+                                                    onclick="openRejectModal('{{ $reservation->id }}')">
+                                                    <i class="fas fa-times"></i> Rejeter
+                                                </button>
+                                            @elseif(!$reservation->archived)
+                                                <form action="{{ route('restaurant.reservation.archive', $reservation->id) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn-action archive">
+                                                        <i class="fas fa-archive"></i> Archiver
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">Archivée</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
                                 <tr>
-                                    <td>{{ $reservation->table->number }}</td>
-                                    <td class="location">{{ $reservation->table->location }}</td>
-                                    <td class="prenom-client">{{ $reservation->client->name ?? 'Client inconnu' }}</td>
-                                    <td>{{ $reservation->client->email ?? 'Email inconnu' }}</td>
-                                    <td>{{ $reservation->reservation_tele }}</td>
-                                    <td class="date">{{ $reservation->reservation_date }}</td>
-                                    <td>{{ $reservation->reservation_time }}</td>
-                                    <td class="actions-cell">
-                                        <form action="{{ route('restaurant.reservation.approve', $reservation->id) }}"
-                                            method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn-action approve">
-                                                <i class="fas fa-check"></i> Approuver
-                                            </button>
-                                        </form>
-                                        <button type="button" class="btn-action reject"
-                                            onclick="openRejectModal('{{ $reservation->id }}')">
-                                            <i class="fas fa-times"></i> Rejeter
-                                        </button>
-                                    </td>
+                                    <td colspan="9" class="text-center">Aucune réservation trouvée</td>
                                 </tr>
-                            @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>
 
                 <div class="card-footer">
-                    <i class="fas fa-clock"></i> Dernière mise à jour: hier à 23:59
+                    <i class="fas fa-clock"></i> Dernière mise à jour: {{ now()->format('d/m/Y à H:i') }}
                 </div>
             </div>
         </div>
@@ -129,32 +187,6 @@
     @endforeach
 
     <style>
-        .prenom-client, .date, .location, .number{
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 150px;
-            cursor: default;
-            position: relative;
-        }
-
-        .prenom-client:hover {
-            white-space: normal;
-            /* Permet le retour à la ligne */
-            overflow: visible;
-            /* Affiche tout le texte */
-            background: #fff;
-            /* Fond blanc pour lisibilité */
-            z-index: 10;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-            position: absolute;
-            /* Sort de la grille pour ne pas casser la mise en page */
-            max-width: 300px;
-            /* Largeur max au survol */
-            padding: 5px;
-            border-radius: 4px;
-        }
-        
         /* Variables pour les couleurs */
         :root {
             --primary-color: #10b981;
@@ -170,9 +202,13 @@
             --danger-dark: #b91c1c;
             --danger-light: #fee2e2;
             --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --warning-dark: #b45309;
             --success-color: #10b981;
             --success-dark: #065f46;
             --success-light: #d1fae5;
+            --neutral-color: #6b7280;
+            --neutral-light: #f3f4f6;
             --table-header: #f1f5f9;
             --table-border: #e2e8f0;
             --table-hover: #f8fafc;
@@ -315,13 +351,86 @@
             margin: 15px 0 30px;
         }
 
+        /* Nouveau - Système d'onglets */
+        .reservation-tabs {
+            margin-bottom: 25px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--table-border);
+            padding-bottom: 15px;
+        }
+
+        .tab-link {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--neutral-color);
+            background-color: var(--neutral-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .tab-link i {
+            margin-right: 8px;
+        }
+
+        .tab-link:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+
+        .tab-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .badge {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: inherit;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        /* Badges de statut */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-badge.pending {
+            background-color: var(--warning-light);
+            color: var(--warning-dark);
+        }
+
+        .status-badge.approved {
+            background-color: var(--success-light);
+            color: var(--success-dark);
+        }
+
+        .status-badge.rejected {
+            background-color: var(--danger-light);
+            color: var(--danger-dark);
+        }
+
         /* Style du tableau */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            /* Ajoute le scroll horizontal si besoin */
             -webkit-overflow-scrolling: touch;
-            /* Pour un scroll fluide sur mobile */
         }
 
 
@@ -353,14 +462,38 @@
             background-color: var(--table-hover);
         }
 
+        .prenom-client, .date, .location, .number{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+            cursor: default;
+            position: relative;
+        }
+
+        .prenom-client:hover {
+            white-space: normal;
+            overflow: visible;
+            background: #fff;
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            max-width: 300px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        /* Message "Aucune réservation" */
+        .text-center {
+            text-align: center;
+        }
+
         /* Boutons d'action */
         .actions-cell {
             display: flex;
             gap: 10px;
             align-items: center;
-            /* Centrage vertical */
         }
-
 
         .btn-action {
             padding: 8px 12px;
@@ -395,6 +528,21 @@
         .btn-action.reject:hover {
             background-color: var(--danger-color);
             color: white;
+        }
+
+        .btn-action.archive {
+            background-color: var(--neutral-light);
+            color: var(--neutral-color);
+        }
+
+        .btn-action.archive:hover {
+            background-color: var(--neutral-color);
+            color: white;
+        }
+
+        .text-muted {
+            color: var(--neutral-color);
+            font-style: italic;
         }
 
         /* Footer de la carte */
@@ -602,7 +750,15 @@
             .data-table th,
             .data-table td {
                 padding: 10px 8px;
-
+            }
+            
+            .tab-navigation {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .tab-link {
+                width: 100%;
             }
         }
 

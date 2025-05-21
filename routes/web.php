@@ -208,4 +208,10 @@ Route::post('/webhook/fedapay', [App\Http\Controllers\WebhookController::class, 
 Route::get('/api/available-tables', [ReservationController::class, 'showAvailableTables'])
     ->name('api.available-tables');
 
+// Archivage d'une réservation
+Route::post('/restaurant/reservation/archive/{id}', [ReservationController::class, 'archive'])->name('restaurant.reservation.archive');
+    
+// Tâche de nettoyage des anciennes réservations (peut être appelée par un cronjob)
+Route::get('/restaurant/reservations/cleanup', [ReservationController::class, 'cleanupOldReservations'])->name('restaurant.reservations.cleanup');
+
 require __DIR__ . '/auth.php';

@@ -446,14 +446,14 @@
             <div class="row g-0 custom-search-input">
                 <div class="col-lg-4">
                     <div class="form-group">
-                        <input class="form-control" type="text" name="query" placeholder="Que recherchez vous ?...">
+                        <input class="form-control" type="text" name="query" placeholder="Cuisine, nom de restaurant...">
                         <i class="icon_search"></i>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="form-group">
                         <input class="form-control no_border_r" type="text" name="location"
-                            placeholder="Cuisine, nom de restaurant...">
+                            placeholder="Que recherchez vous ?...">
                         <i class="icon_pin_alt"></i>
                     </div>
                 </div>

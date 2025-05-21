@@ -288,13 +288,13 @@
                                 <div class="row g-2">
                                     <div class="col-lg-5 col-md-5">
                                         <div class="form-group">
-                                            <input class="form-control" type="text" name="query" placeholder="Que recherchez-vous ?">
+                                            <input class="form-control" type="text" name="query" placeholder="Cuisine, nom de restaurant...">
                                             <i class="fas fa-search"></i>
                                         </div>
                                     </div>
                                     <div class="col-lg-5 col-md-5">
                                         <div class="form-group">
-                                            <input class="form-control" type="text" name="location" placeholder="Cuisine, nom de restaurant...">
+                                            <input class="form-control" type="text" name="location" placeholder="Que recherchez-vous ?">
                                             <i class="fas fa-map-marker-alt"></i>
                                         </div>
                                     </div>
@@ -358,9 +358,9 @@
                     <div class="col isotope-item">
                         <div class="restaurant-card shadow-sm">
                             @if($restaurant->image_path)
-                                <img src="{{ asset($restaurant->image_path) }}" class="card-img-top" alt="{{ $restaurant->name }}">
+                                <a href="{{ url('client/book/' . $restaurant->id) }}"><img src="{{ asset($restaurant->image_path) }}" class="card-img-top" alt="{{ $restaurant->name }}"></a>
                             @else
-                                <img src="{{ asset('assets-home/img/detail_3.jpg') }}" class="card-img-top" alt="{{ $restaurant->name }}">
+                            <a href="{{ url('client/book/' . $restaurant->id) }}"><img src="{{ asset('assets-home/img/detail_3.jpg') }}" class="card-img-top" alt="{{ $restaurant->name }}"></a>
                             @endif
                             <div class="card-body">
                                 <h5 class="card-title">{{ $restaurant->name }}</h5>
