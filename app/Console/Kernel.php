@@ -10,9 +10,18 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule): void
+    protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Exécuter la commande tous les jours à 6h du matin
+        $schedule->command('reservations:mark-honored')
+                 ->dailyAt('06:00')
+                 ->appendOutputTo(storage_path('logs/scheduler.log'));
+                 
+        // Alternative : exécuter toutes les heures pendant les heures d'ouverture
+         $schedule->command('reservations:mark-honored')
+                  ->hourly()
+                  ->between('08:00', '23:00')
+                  ->appendOutputTo(storage_path('logs/scheduler.log'));
     }
 
     /**

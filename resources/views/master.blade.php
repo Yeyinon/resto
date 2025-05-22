@@ -56,7 +56,7 @@
     <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/submit.css') }}" rel="stylesheet">
 
-    <title>@yield('title', 'Resto -Accueil')</title>
+    <title>@yield('title', 'Resto ')</title>
 
     <style>
         /* Variables pour les couleurs */

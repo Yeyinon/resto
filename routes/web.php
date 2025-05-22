@@ -114,7 +114,9 @@ Route::prefix('client')->group(function () {
     //middleware ROUTES
     Route::middleware(['Client'])->group(function () {
 
-        Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+        Route::get('/restaurant/{restaurant}/comment', [App\Http\Controllers\CommentController::class, 'showCommentForm'])->name('client.comment.form');
+    Route::post('/comment/store', [App\Http\Controllers\CommentController::class, 'store'])->name('client.comment.store');
+    Route::get('/restaurant/{restaurant}/can-comment', [App\Http\Controllers\CommentController::class, 'checkCanComment'])->name('client.comment.check');
         Route::get('/logout', [ClientController::class, 'logout'])->name('client.logout');
         Route::get('/dashboard', [ClientController::class, 'dashboard'])->name('client.dashboard');
         Route::get('/profile', [ClientController::class, 'profile'])->name('client.profile');
@@ -214,4 +216,37 @@ Route::post('/restaurant/reservation/archive/{id}', [ReservationController::clas
 // Tâche de nettoyage des anciennes réservations (peut être appelée par un cronjob)
 Route::get('/restaurant/reservations/cleanup', [ReservationController::class, 'cleanupOldReservations'])->name('restaurant.reservations.cleanup');
 
+Route::get('/restaurant/chart-data', [App\Http\Controllers\RestaurantController::class, 'getChartData'])->name('restaurant.chart-data');
+
+// Routes pour les commentaires (à ajouter dans web.php)
+
+// Routes pour les commentaires - nécessitent une authentification client
+Route::middleware(['auth:client'])->group(function () {
+    // Afficher le formulaire de commentaire
+    Route::get('/restaurants/{restaurant}/comment', [CommentController::class, 'showCommentForm'])
+        ->name('comments.form');
+    
+    // Stocker un nouveau commentaire
+    Route::post('/comments', [CommentController::class, 'store'])
+        ->name('comments.store');
+});
+
+// Routes API pour les vérifications AJAX
+Route::prefix('api')->group(function () {
+    // Vérifier si un client peut commenter (nécessite une authentification)
+    Route::middleware(['auth:client'])->get('/check-comment-permission/{restaurant}', [CommentController::class, 'checkCanComment'])
+        ->name('api.check.comment');
+    
+    // Obtenir les tables disponibles (route existante)
+    Route::get('/available-tables', [RestaurantController::class, 'getAvailableTables'])
+        ->name('api.available.tables');
+});
+
+// Mise à jour de la route pour afficher les détails du restaurant avec commentaires
+Route::get('/restaurants/{restaurant}/menu', [RestaurantController::class, 'showMenu'])
+    ->name('client.restaurant.detail');
+
+// Route pour la réservation (existante - à conserver)
+Route::middleware(['auth:client'])->post('/reservation/create', [ReservationController::class, 'store'])
+    ->name('client.reservation.create');
 require __DIR__ . '/auth.php';

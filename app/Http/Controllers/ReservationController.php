@@ -360,4 +360,52 @@ public function index(Request $request)
     
     return view('reservations.index', compact('reservations'));
 }
+
+/**
+ * Marquer une réservation comme honorée (automatique ou manuel)
+ */
+public function markAsHonored($id = null)
+{
+    if ($id) {
+        // Marquer une réservation spécifique
+        $reservation = Reservation::findOrFail($id);
+        
+        $restaurant = Auth::guard('restaurant')->user();
+        if ($reservation->table->restaurant_id !== $restaurant->id) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas modifier cette réservation.');
+        }
+        
+        $reservation->update(['status' => 'honored']);
+        
+        return redirect()->back()->with('success', 'Réservation marquée comme honorée.');
+    } else {
+        // Marquer automatiquement toutes les réservations confirmées passées comme honorées
+        $honoreReservations = Reservation::where('status', 'confirmed')
+            ->where('reservation_date', '<', Carbon::now()->toDateString())
+            ->update(['status' => 'honored']);
+            
+        return response()->json([
+            'message' => "$honoreReservations réservations marquées comme honorées.",
+            'count' => $honoreReservations
+        ]);
+    }
+}
+
+/**
+ * Tâche automatique pour marquer les réservations comme honorées
+ * (À exécuter via une tâche cron ou un scheduler Laravel)
+ */
+public function autoMarkHonoredReservations()
+{
+    // Marquer comme honorées toutes les réservations confirmées dont la date est passée
+    $yesterday = Carbon::yesterday()->toDateString();
+    
+    $honoreReservations = Reservation::where('status', 'confirmed')
+        ->where('reservation_date', '<=', $yesterday)
+        ->update(['status' => 'honored']);
+    
+    \Log::info("Auto-marked $honoreReservations reservations as honored");
+    
+    return $honoreReservations;
+}
 }

@@ -284,44 +284,121 @@ class RestaurantController extends Controller
 }
 
 
-    public function getAvailableTables(Request $request)
-    {
-        $request->validate([
-            'restaurant_id' => 'required|integer',
-            'date' => 'required|date',
-            'time' => 'required|string',
-        ]);
-        
-        $restaurantId = $request->restaurant_id;
-        $date = $request->date;
-        $time = $request->time;
-        
-        // Récupérer toutes les tables du restaurant
-        $tables = Table::where('restaurant_id', $restaurantId)->get();
-        
-        // Récupérer les tables déjà réservées à cette date et heure
-        $reservedTableIds = Reservation::where('reservation_date', $date)
-                                      ->where('reservation_time', $time)
-                                      ->whereHas('table', function ($query) use ($restaurantId) {
-                                          $query->where('restaurant_id', $restaurantId);
-                                      })
-                                      ->pluck('table_id')
-                                      ->toArray();
-        
-        // Préparer les données de réponse
-        $tableData = [];
-        foreach ($tables as $table) {
-            $tableData[] = [
-                'id' => $table->id,
-                'number' => $table->number,
-                'capacity' => $table->capacity,
-                'is_available' => !in_array($table->id, $reservedTableIds)
-            ];
-        }
-        
-        return response()->json([
-            'tables' => $tableData
-        ]);
+public function getAvailableTables(Request $request)
+{
+    $request->validate([
+        'restaurant_id' => 'required|integer',
+        'date' => 'required|date',
+        'time' => 'required|string',
+    ]);
+    
+    $restaurantId = $request->restaurant_id;
+    $date = $request->date;
+    $time = $request->time;
+    
+    // Récupérer toutes les tables du restaurant avec tous les champs nécessaires
+    $tables = Table::where('restaurant_id', $restaurantId)
+                   ->select('id', 'number','guest_number', 'location')
+                   ->get();
+    
+    // Récupérer les tables déjà réservées à cette date et heure
+    $reservedTableIds = Reservation::where('reservation_date', $date)
+                                  ->where('reservation_time', $time)
+                                  ->whereHas('table', function ($query) use ($restaurantId) {
+                                      $query->where('restaurant_id', $restaurantId);
+                                  })
+                                  ->pluck('table_id')
+                                  ->toArray();
+    
+    // Préparer les données de réponse avec tous les champs nécessaires
+    $tableData = [];
+    foreach ($tables as $table) {
+        $tableData[] = [
+            'id' => $table->id,
+            'number' => $table->number,
+            'guest_number' => $table->guest_number ?? $table->capacity ?? 0,
+            'location' => $table->location ?? 'Non spécifiée',
+            'is_available' => !in_array($table->id, $reservedTableIds)
+        ];
     }
     
+    return response()->json([
+        'tables' => $tableData,
+        'reservées' => $reservedTableIds
+    ]);
+}
+    
+    public function getChartData(Request $request)
+{
+    $restaurant = Auth::guard('restaurant')->user();
+    $restaurantId = $restaurant->id;
+    $period = $request->query('period', 'week');
+    $locale = 'fr'; // Locale française
+    
+    $labels = [];
+    $data = [];
+    
+    switch ($period) {
+        case 'week':
+            // Données pour la semaine (7 derniers jours)
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i)->locale($locale);
+                $formattedDate = $date->isoFormat('ddd'); // Format jour abrégé selon la locale
+                $count = Reservation::whereDate('created_at', $date->format('Y-m-d'))
+                    ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
+                        $query->where('id', $restaurantId);
+                    })
+                    ->count();
+                    
+                $labels[] = $formattedDate;
+                $data[] = $count;
+            }
+            break;
+            
+        case 'month':
+            // Données pour le mois (4 dernières semaines)
+            for ($i = 3; $i >= 0; $i--) {
+                $startDate = Carbon::now()->startOfWeek()->subWeeks($i);
+                $endDate = (clone $startDate)->endOfWeek();
+                
+                // Format: "semaine du 1 au 7 mai"
+                $weekLabel = 'Sem. ' . $startDate->format('d') . '-' . $endDate->format('d') . ' ' . $endDate->locale($locale)->format('M');
+                
+                $count = Reservation::whereBetween('created_at', [$startDate, $endDate])
+                    ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
+                        $query->where('id', $restaurantId);
+                    })
+                    ->count();
+                    
+                $labels[] = $weekLabel;
+                $data[] = $count;
+            }
+            break;
+            
+        case 'year':
+            // Données pour l'année (12 derniers mois)
+            for ($i = 11; $i >= 0; $i--) {
+                $date = Carbon::now()->subMonths($i)->locale($locale);
+                $monthName = $date->format('M'); // Nom du mois abrégé
+                
+                $startOfMonth = (clone $date)->startOfMonth();
+                $endOfMonth = (clone $date)->endOfMonth();
+                
+                $count = Reservation::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                    ->whereHas('table.restaurant', function ($query) use ($restaurantId) {
+                        $query->where('id', $restaurantId);
+                    })
+                    ->count();
+                    
+                $labels[] = $monthName;
+                $data[] = $count;
+            }
+            break;
+    }
+    
+    return response()->json([
+        'labels' => $labels,
+        'data' => $data,
+    ]);
+}
 }

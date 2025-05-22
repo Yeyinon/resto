@@ -204,7 +204,7 @@
                                     alt="{{ $restaurant->name }}">
                             @endif
 
-                            <a href="client/book/{{ $restaurant->id }}" class="strip_info">
+                            <a href="{{ url('client/book/' . $restaurant->id) }}" class="strip_info">
                                 <small>{{ $restaurant->location }}</small>
                                 <div class="item_title">
                                     <h3>{{ $restaurant->name }}</h3>
