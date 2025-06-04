@@ -5,14 +5,6 @@
     <!-- Section titre de la page -->
     <div class="page-title-section">
         <div class="container">
-            <h1 class="page-title">Réservation</h1>
-            <div class="breadcrumb-modern">
-                <a href="/" class="breadcrumb-item">Accueil</a>
-                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
-                <a href="{{ route('view_all') }}" class="breadcrumb-item">Restaurants</a>
-                <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
-                <span class="breadcrumb-item active">Réservation</span>
-            </div>
         </div>
     </div>
 
@@ -47,28 +39,37 @@
                         </div>
                     </div>
 
-                    <!-- Menu du restaurant -->
-                    <div class="content-card">
-                        <div class="menu-section">
-                            <h3><i class="fas fa-utensils"></i> Menu du restaurant</h3>
-                            
-                            @if(isset($menus) && $menus->count() > 0)
-                                <div class="menu-items">
-                                    @foreach($menus as $menu)
-                                        <h4>{{ $menu->name }}</h4>
-                                        <ul>
+                    {{-- Section pour afficher les menus et les plats --}}
+                    <div class="content-card mt-4">
+                        <h3>Notre Menu</h3>
+                        @if($menus->count() > 0)
+                            @foreach($menus as $menu)
+                                <div class="menu-category mb-4">
+                                    <h4>{{ $menu->nom }}</h4>
+                                    @if($menu->plats->count() > 0)
+                                        <div class="row">
                                             @foreach($menu->plats as $plat)
-                                                <li>{{ $plat->name }} - {{ number_format($plat->price, 2) }} €</li>
+                                                <div class="col-md-4 col-sm-6 mb-3">
+                                                    <div class="menu-item text-center">
+                                                        @if($plat->photo)
+                                                            <img src="{{ asset('storage/' . $plat->photo) }}" alt="{{ $plat->nom }}" class="img-fluid rounded menu-item-photo">
+                                                        @else
+                                                            <img src="{{ asset('images/placeholder-plat.png') }}" alt="Image non disponible" class="img-fluid rounded menu-item-photo">
+                                                        @endif
+                                                        <p class="menu-item-name mt-2"><strong>{{ $plat->nom }}</strong></p>
+                                                        {{-- Ne pas afficher le prix ici --}}
+                                                    </div>
+                                                </div>
                                             @endforeach
-                                        </ul>
-                                    @endforeach
+                                        </div>
+                                    @else
+                                        <p>Aucun plat disponible pour ce menu.</p>
+                                    @endif
                                 </div>
-                            @else
-                                <div class="menu-empty">
-                                    <p><i class="fas fa-info-circle"></i> Ce restaurant n'a pas encore ajouté son menu. Contactez-le directement pour plus d'informations sur les plats proposés.</p>
-                                </div>
-                            @endif
-                        </div>
+                            @endforeach
+                        @else
+                            <p>Aucun menu disponible pour ce restaurant.</p>
+                        @endif
                     </div>
 
                     <!-- Section commentaires -->
@@ -139,9 +140,31 @@
                         
                         <div class="reservation-form">
                             <form method="post" action="{{ route('client.reservation.create') }}" id="reservationForm">
+                                @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                @if (session('error'))
+                                    <div class="alert alert-danger">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
+
+                                @if (session('success'))
+                                    <div class="alert alert-success">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
                                 @csrf
                                 <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}">
                                 <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
+                                {{-- SUPPRIMER CETTE LIGNE : <input type="hidden" name="guest_number" id="guest_number_input"> --}}
 
                                 <!-- Date de réservation -->
                                 <div class="form-group">
@@ -227,11 +250,21 @@
                                         @if (Auth::guard('client')->check()) value="{{ Auth::guard('client')->user()->email }}" @else placeholder="Votre email" @endif>
                                 </div>
                                 
+                                {{-- SUPPRIMER CES LIGNES DUPLIQUÉES --}}
+                                {{-- <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}"> --}}
+                                {{-- <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}"> --}}
+                                {{-- <input type="hidden" name="guest_number" id="guest_number_input">  --}}
+                                
                                 <div class="form-group">
-                                    <label><i class="fas fa-phone"></i> Téléphone</label>
-                                    <input class="form-control" required type="text" name="reservation_tele"
-                                        placeholder="Votre téléphone">
-                                </div>
+                                    <label for="reservation_tele">Téléphone *</label>
+                                    <input type="text" id="reservation_tele" name="reservation_tele" class="form-control"
+                                        value="{{ old('reservation_tele', Auth::guard('client')->user()->tele) }}" required>
+                                    @error('reservation_tele')
+                                        <div class="alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                {{-- CORRECTION DE LA BALISE DIV MAL FERMÉE --}}
+                                </div> 
+                                {{-- <div class="form-group"></div> --}} {{-- SUPPRIMER CETTE LIGNE --}}
 
                                 <!-- Bouton de réservation -->
                                 <button type="submit" class="btn-primary-custom btn-block">
@@ -361,7 +394,7 @@
             color: #ffd700;
         }
         
-        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating input[type="radio"]:checked + label,
         .star-rating label.active {
             color: #ffd700;
         }
@@ -593,6 +626,14 @@
         const reservationForm = document.getElementById('reservationForm');
         const commentFormContainer = document.getElementById('comment-form-container');
         
+        // Initialisation de guestNumberInput une fois le DOM chargé
+        // guestNumberInput n'est plus nécessaire ici car le champ hidden est supprimé
+        // const guestNumberInput = document.getElementById('guest_number_input'); // SUPPRIMER CETTE LIGNE
+        // console.log('1. DOMContentLoaded: guestNumberInput trouvé?', guestNumberInput ? 'Oui' : 'Non', 'ID:', guestNumberInput ? guestNumberInput.id : 'N/A');
+        // if (guestNumberInput) {
+        //     console.log('2. DOMContentLoaded: Valeur initiale de guestNumberInput:', guestNumberInput.value);
+        // }
+
         // Vérifier si le client peut commenter
         @auth('client')
         checkCommentPermission();
@@ -735,163 +776,234 @@
             }
         }
         
-        // Fonction pour mettre à jour les tables disponibles (code existant)
-function updateAvailableTables() {
-    const selectedDate = dateInput.value;
-    let selectedTime = null;
-    
-    for (const timeInput of timeInputs) {
-        if (timeInput.checked) {
-            selectedTime = timeInput.value;
-            break;
-        }
-    }
-    
-    if (!selectedDate || !selectedTime) {
-        tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Veuillez d\'abord sélectionner une date et une heure</p>';
-        return;
-    }
-    
-    tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Chargement des tables disponibles...</p>';
-    
-    fetch(`/api/available-tables?restaurant_id={{ $restaurant->id }}&date=${selectedDate}&time=${selectedTime}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erreur réseau: ' + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Données reçues:", data);
-        
-        tableOptionsContainer.innerHTML = '';
-        
-        const availableTables = data.tables || [];
-        const reservedTableIds = data.reservées || [];
-        
-        if (availableTables.length === 0) {
-            tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure</p>';
-            return;
-        }
-        
-        // Grouper les tables par capacité pour un meilleur affichage
-        const tablesByCapacity = {};
-        availableTables.forEach(table => {
-            // Utiliser guest_number en priorité, sinon capacity, sinon 1 par défaut
-            const capacity = table.guest_number || table.capacity || 1;
-            if (!tablesByCapacity[capacity]) {
-                tablesByCapacity[capacity] = [];
-            }
-            tablesByCapacity[capacity].push(table);
-        });
-        
-        // Afficher les tables triées par capacité
-        Object.keys(tablesByCapacity).sort((a, b) => a - b).forEach(capacity => {
-            const tables = tablesByCapacity[capacity];
-            
-            tables.forEach(table => {
-                const isReserved = reservedTableIds.includes(table.id);
-                const tableDiv = document.createElement('div');
-                tableDiv.className = `table-option ${isReserved ? 'reserved' : 'available'}`;
-                
-                // S'assurer que nous avons une valeur valide pour le nombre de personnes
-                const guestNumber = table.guest_number || table.capacity || 1;
-                // S'assurer que nous avons une localisation
-                const location = table.location || 'Emplacement non spécifié';
-                
-                if (isReserved) {
-                    tableDiv.innerHTML = `
-                        <div class="table-option-content">
-                            <div class="table-option-details">
-                                <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
-                                <span class="table-status">
-                                    <i class="fas fa-times-circle"></i> Réservée
-                                </span>
-                            </div>
-                            <div class="table-option-location">
-                                <i class="fas fa-map-marker-alt"></i> ${location}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    tableDiv.innerHTML = `
-                        <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}" required>
-                        <label for="table_${table.id}" class="table-label">
-                            <div class="table-option-content">
-                                <div class="table-option-details">
-                                    <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
-                                    <span class="table-status">
-                                        <i class="fas fa-check-circle"></i> Disponible
-                                    </span>
-                                </div>
-                                <div class="table-option-location">
-                                    <i class="fas fa-map-marker-alt"></i> ${location}
-                                </div>
-                            </div>
-                        </label>
-                    `;
-                    
-                    tableDiv.addEventListener('click', function() {
-                        const radio = this.querySelector('input[type="radio"]');
-                        if (radio) {
-                            radio.checked = true;
-                            // Retirer la sélection des autres tables
-                            document.querySelectorAll('.table-option.available').forEach(el => {
-                                el.style.boxShadow = 'none';
-                            });
-                            // Ajouter la sélection à cette table
-                            this.style.boxShadow = '0 0 0 2px var(--primary-color)';
-                        }
-                    });
-                }
-                
-                tableOptionsContainer.appendChild(tableDiv);
-            });
-        });
-        
-        // Sélectionner automatiquement la première table disponible
-        const firstAvailableRadio = tableOptionsContainer.querySelector('input[type="radio"]');
-        if (firstAvailableRadio) {
-            firstAvailableRadio.checked = true;
-            firstAvailableRadio.closest('.table-option').style.boxShadow = '0 0 0 2px var(--primary-color)';
-        }
-    })
-    .catch(error => {
-        console.error("Erreur lors de la récupération des tables :", error);
-        tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Erreur lors du chargement des tables. Veuillez réessayer.</p>';
-    });
-}
-        // Événements pour la réservation
-        dateInput.addEventListener('change', updateAvailableTables);
-        timeInputs.forEach(input => {
-            input.addEventListener('change', updateAvailableTables);
-        });
-        
-        // Validation du formulaire de réservation
-        reservationForm.addEventListener('submit', function(event) {
-            const selectedTable = document.querySelector('input[name="table_id"]:checked');
+        // Fonction pour mettre à jour les tables disponibles
+        function updateAvailableTables() {
             const selectedDate = dateInput.value;
             let selectedTime = null;
-            
+
             for (const timeInput of timeInputs) {
                 if (timeInput.checked) {
                     selectedTime = timeInput.value;
                     break;
                 }
             }
+
+            console.log("3. updateAvailableTables: Date sélectionnée:", selectedDate);
+            console.log("4. updateAvailableTables: Heure sélectionnée:", selectedTime);
+
+            if (!selectedDate || !selectedTime) {
+                tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Veuillez d\'abord sélectionner une date et une heure</p>';
+                // guestNumberInput n'est plus pertinent ici
+                // if (guestNumberInput) {
+                //     guestNumberInput.value = ''; 
+                //     console.log('5. updateAvailableTables: guest_number réinitialisé (date/heure manquantes):', guestNumberInput.value);
+                // }
+                return;
+            }
+
+            tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Chargement des tables disponibles...</p>';
+
+            fetch(`/api/available-tables?restaurant_id={{ $restaurant->id }}&date=${selectedDate}&time=${selectedTime}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("6. Données reçues de l'API:", data);
+
+                tableOptionsContainer.innerHTML = '';
+
+                const availableTables = data.tables || [];
+                const reservedTableIds = data.reservées || [];
+
+                if (availableTables.length === 0) {
+                    tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure</p>';
+                    // guestNumberInput n'est plus pertinent ici
+                    // if (guestNumberInput) {
+                    //     guestNumberInput.value = ''; 
+                    //     console.log('7. updateAvailableTables: guest_number réinitialisé (aucune table disponible):', guestNumberInput.value);
+                    // }
+                    return;
+                }
+
+                const tablesByCapacity = {};
+                availableTables.forEach(table => {
+                    const capacity = table.guest_number || table.capacity || 1;
+                    if (!tablesByCapacity[capacity]) {
+                        tablesByCapacity[capacity] = [];
+                    }
+                    tablesByCapacity[capacity].push(table);
+                });
+
+                Object.keys(tablesByCapacity).sort((a, b) => a - b).forEach(capacity => {
+                    const tables = tablesByCapacity[capacity];
+
+                    tables.forEach(table => {
+                        const isReserved = reservedTableIds.includes(table.id);
+                        const tableDiv = document.createElement('div');
+                        tableDiv.className = `table-option ${isReserved ? 'reserved' : 'available'}`;
+
+                        const guestNumber = table.guest_number || table.capacity || 1;
+                        const location = table.location || 'Emplacement non spécifié';
+
+                        if (isReserved) {
+                            tableDiv.innerHTML = `
+                                <div class="table-option-content">
+                                    <div class="table-option-details">
+                                        <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
+                                        <span class="table-status">
+                                            <i class="fas fa-times-circle"></i> Réservée
+                                        </span>
+                                    </div>
+                                    <div class="table-option-location">
+                                        <i class="fas fa-map-marker-alt"></i> ${location}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            tableDiv.innerHTML = `
+                                <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}" required>
+                                <label for="table_${table.id}" class="table-label">
+                                    <div class="table-option-content">
+                                        <div class="table-option-details">
+                                            <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
+                                            <span class="table-status">
+                                                <i class="fas fa-check-circle"></i> Disponible
+                                            </span>
+                                        </div>
+                                        <div class="table-option-location">
+                                            <i class="fas fa-map-marker-alt"></i> ${location}
+                                        </div>
+                                    </div>
+                                </label>
+                            `;
+
+                            tableDiv.addEventListener('click', function() {
+                                const radio = this.querySelector('input[type="radio"]');
+                                if (radio) {
+                                    radio.checked = true;
+                                    document.querySelectorAll('.table-option.available').forEach(el => {
+                                        el.style.boxShadow = 'none';
+                                    });
+                                    this.style.boxShadow = '0 0 0 2px var(--primary-color)';
+
+                                    // guestNumberInput n'est plus pertinent ici
+                                    // if (guestNumberInput) {
+                                    //     guestNumberInput.value = guestNumber;
+                                    //     console.log('8. guest_number mis à jour via clic:', guestNumberInput.value);
+                                    // }
+                                }
+                            });
+                        }
+
+                        tableOptionsContainer.appendChild(tableDiv);
+                    });
+                });
+
+                // Sélectionner automatiquement la première table disponible
+                const firstAvailableRadio = tableOptionsContainer.querySelector('input[type="radio"]');
+                console.log('firstAvailableRadio found?', firstAvailableRadio ? 'Yes' : 'No'); 
+                if (firstAvailableRadio) {
+                    firstAvailableRadio.checked = true;
+                    firstAvailableRadio.closest('.table-option').style.boxShadow = '0 0 0 2px var(--primary-color)';
+                    
+                    const selectedTableId = firstAvailableRadio.value;
+                    const selectedTable = availableTables.find(t => t.id == selectedTableId);
+                    
+                    // guestNumberInput n'est plus pertinent ici
+                    // if (selectedTable && guestNumberInput) {
+                    //     guestNumberInput.value = selectedTable.guest_number || selectedTable.capacity || 1;
+                    //     console.log('9. guest_number mis à jour via sélection auto:', guestNumberInput.value);
+                    // } else { 
+                    //     console.log('9.1. Auto-selection: selectedTable ou guestNumberInput est null/undefined.', { selectedTable, guestNumberInput });
+                    // }
+                } else {
+                    // guestNumberInput n'est plus pertinent ici
+                    // if (guestNumberInput) {
+                    //     guestNumberInput.value = ''; 
+                    //     console.log('10. updateAvailableTables: guest_number réinitialisé (aucune table auto-sélectionnée):', guestNumberInput.value);
+                    // }
+                }
+            })
+            .catch(error => {
+                console.error("11. Erreur lors de la récupération des tables :", error);
+                tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Erreur lors du chargement des tables. Veuillez réessayer.</p>';
+                // guestNumberInput n'est plus pertinent ici
+                // if (guestNumberInput) {
+                //     guestNumberInput.value = ''; 
+                //     console.log('12. updateAvailableTables: guest_number réinitialisé (erreur API):', guestNumberInput.value);
+                // }
+            });
+        }
+        // Événements pour la réservation
+        dateInput.addEventListener('change', updateAvailableTables);
+        timeInputs.forEach(input => {
+            input.addEventListener('change', updateAvailableTables);
+        });
+
+        // Validation du formulaire de réservation
+        reservationForm.addEventListener('submit', function(event) {
+            console.log('13. Soumission du formulaire détectée.');
+            // guestNumberInput n'est plus pertinent ici, on ne le valide plus côté client
+            // const currentGuestNumberInput = document.getElementById('guest_number_input');
             
+            // console.log('14. Valeur de guestNumberInput.value AVANT soumission:', currentGuestNumberInput ? currentGuestNumberInput.value : 'guestNumberInput non trouvé');
+            // console.log('14.1. currentGuestNumberInput est-il null?', currentGuestNumberInput === null); 
+            // console.log('14.2. currentGuestNumberInput est-il undefined?', typeof currentGuestNumberInput === 'undefined'); 
+
+
+            const selectedTable = document.querySelector('input[name="table_id"]:checked');
+            const selectedDate = dateInput.value;
+            let selectedTime = null;
+
+            for (const timeInput of timeInputs) {
+                if (timeInput.checked) {
+                    selectedTime = timeInput.value;
+                    break;
+                }
+            }
+
             if (!selectedDate || !selectedTime || !selectedTable) {
                 event.preventDefault();
                 alert('Veuillez sélectionner une date, une heure et une table pour effectuer votre réservation.');
+                console.log('15. Soumission bloquée: Date, heure ou table manquante.');
+                return;
             }
+            
+            // SUPPRIMER CETTE VALIDATION JAVASCRIPT POUR guest_number
+            // if (!currentGuestNumberInput || currentGuestNumberInput.value === '' || isNaN(parseInt(currentGuestNumberInput.value)) || parseInt(currentGuestNumberInput.value) < 1) {
+            //     event.preventDefault();
+            //     alert('Le nombre d\'invités n\'a pas pu être déterminé ou est invalide. Veuillez sélectionner une table.');
+            //     console.log('16. Soumission bloquée: guest_number invalide ou non déterminé.');
+            //     return;
+            // }
+            console.log('17. Validation JavaScript passée. Tentative de soumission du formulaire.');
         });
-        
+
         console.log("Script de réservation chargé avec système de commentaires");
     });
     </script>
+    <style>
+        .menu-item-photo {
+            width: 100%;
+            height: 150px; /* Ajustez la hauteur selon vos préférences */
+            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
+        }
+        .menu-item-name {
+            font-size: 1.1em;
+            color: #333;
+        }
+        .menu-category h4 {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
 @endsection

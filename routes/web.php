@@ -246,7 +246,5 @@ Route::prefix('api')->group(function () {
 Route::get('/restaurants/{restaurant}/menu', [RestaurantController::class, 'showMenu'])
     ->name('client.restaurant.detail');
 
-// Route pour la réservation (existante - à conserver)
-Route::middleware(['auth:client'])->post('/reservation/create', [ReservationController::class, 'store'])
-    ->name('client.reservation.create');
+
 require __DIR__ . '/auth.php';

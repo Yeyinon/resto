@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Resto - Découvrir et réserver les meilleurs restaurants au meilleur prix">
     <meta name="author" content="Resto">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- GOOGLE WEB FONT -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">

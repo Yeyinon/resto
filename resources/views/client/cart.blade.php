@@ -7,12 +7,6 @@
 <!-- Page Title Section -->
 <div class="page-title-section">
     <div class="container">
-        <h1 class="page-title">Mon Panier</h1>
-        <div class="breadcrumb-modern">
-            <a href="/" class="breadcrumb-item">Accueil</a>
-            <span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
-            <span class="breadcrumb-item active">Panier</span>
-        </div>
     </div>
 </div>
 

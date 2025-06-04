@@ -287,9 +287,15 @@ class ReservationController extends Controller
         return redirect()->route("client.reservations");
     }
 
-    public function confirmation($id)
+    public function confirmation(Reservation $reservation) // <-- MODIFICATION ICI
     {
-        $reservation = Reservation::with('restaurant')->findOrFail($id);
+        // Laravel a déjà trouvé la réservation pour vous.
+        // Vous n'avez plus besoin de faire Reservation::with('restaurant')->findOrFail($id);
+        // $reservation est déjà l'objet Reservation.
+
+        // Charger la relation 'restaurant' si elle n'est pas déjà chargée (bonne pratique)
+        $reservation->load('restaurant'); // S'assure que la relation est chargée
+
         $restaurant = $reservation->restaurant;
 
         return view('client.confirm', compact('reservation', 'restaurant'));
