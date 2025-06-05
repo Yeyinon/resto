@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Authenticatable
 {
@@ -38,4 +39,10 @@ class Client extends Authenticatable
    protected $casts = [
     'email_verified_at' => 'datetime',
 ];
+
+public function yumsTransactions(): HasMany
+    {
+        return $this->hasMany(YumTransaction::class);
+    }
+
 }

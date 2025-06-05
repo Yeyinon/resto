@@ -128,6 +128,12 @@ Route::prefix('client')->group(function () {
         Route::post('/reservation/{id}/cancel', [ClientController::class, 'requestCancellation'])
             ->name('reservation.cancel');
             Route::get('/tables/disponibles', [RestaurantController::class, 'showAvailableTables']);
+            Route::get('/client/profile', [ClientController::class, 'profile'])->name('client.profile');
+            Route::get('/client/yums', [ClientController::class, 'yumsHistory'])->name('client.yums_history');
+
+            Route::get('/client/profile', [ClientController::class, 'profile'])->name('client.profile');
+
+            Route::post('/client/profile/update', [ClientController::class, 'updateProfile'])->name('client.profile.update');
 
         // Afficher les menus du restaurant
         Route::get('/client/menu/{restaurant_id}', [ClientController::class, 'showMenu'])->name('client.menu');
@@ -139,10 +145,15 @@ Route::prefix('client')->group(function () {
         // 🛒 Routes du panier
         Route::post('/cart/add', [CartController::class, 'add'])->name('client.cart.add');
         Route::get('/cart', [CartController::class, 'view'])->name('client.cart.view');
-        Route::post('/payment/fedapay', [PaymentController::class, 'pay'])->name('fedapay.pay');
-        Route::get('/payment/fedapay/success', [PaymentController::class, 'success'])->name('fedapay.success');
-        Route::post('/payment/fedapay/callback', [PaymentController::class, 'callback'])->name('fedapay.callback');
+        Route::post('/process-payment', [PaymentController::class, 'pay'])->name('process.payment');
 
+        // Assurez-vous aussi que cette route GET pour le succès est définie si vous l'utilisez
+        Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+
+        // Et le callback FedaPay si vous l'avez configuré
+        Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+
+        Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
     });
 });
@@ -178,10 +189,7 @@ Route::post('/test', [AdminController::class, 'test'])->name('test');
 
 
 //Common routes
-Route::get('/', function () {
-    $restaurants = Restaurant::all();
-    return view('index', compact("restaurants"));
-});
+Route::get('/', [RestaurantController::class, 'index'])->name('home');
 
 Route::get('/restaurants', function () {
     $nbr_resto = Restaurant::count();

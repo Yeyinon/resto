@@ -401,4 +401,21 @@ public function getAvailableTables(Request $request)
         'data' => $data,
     ]);
 }
+
+public function index() // Ou le nom de votre méthode qui renvoie la vue index.blade.php
+{
+    // Récupérer les restaurants populaires (déjà fait dans votre index.blade.php)
+    $restaurants = Restaurant::all(); // Ceci est déjà passé à la vue index.blade.php
+
+    // Récupérer les commentaires les plus récents pour la section "Témoignages de nos clients"
+    // Nous allons récupérer un certain nombre de commentaires (par exemple, les 10 plus récents)
+    // et charger la relation 'client' car vous avez besoin du nom du client
+    // et la relation 'restaurant' pour afficher le nom du restaurant
+    $comments = Comment::with(['client', 'restaurant'])
+                       ->latest() // Trie par date de création décroissante (les plus récents en premier)
+                       ->limit(10) // Limite le nombre de commentaires à afficher
+                       ->get();
+
+    return view('index', compact('restaurants', 'comments'));
+}
 }

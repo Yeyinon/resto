@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ReservationCancelledByClient;
 use App\Models\Menu;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class ClientController extends Controller
@@ -214,7 +215,8 @@ class ClientController extends Controller
     
     public function profile()
     {
-        return view('client.client_profile');
+        $client = Auth::guard('client')->user();
+        return view('client.profile', compact('client'));
     }
     
     public function reservation()
@@ -340,5 +342,58 @@ class ClientController extends Controller
         $reservation->delete();
 
         return redirect()->route('client.reservations')->with('success', 'Votre réservation a été annulée avec succès. Le restaurant a été notifié.');
+    }
+
+    // Méthode pour mettre à jour le profil du client
+    public function updateProfile(Request $request)
+    {
+        $client = Auth::guard('client')->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                // S'assurer que l'email est unique sauf pour l'utilisateur actuel
+                Rule::unique('clients')->ignore($client->id),
+            ],
+            'phone' => 'nullable|string|max:20', // Exemple: téléphone optionnel
+            'address' => 'nullable|string|max:255', // Exemple: adresse optionnelle
+            'current_password' => 'nullable|required_with:new_password|current_password:client', // 'current_password:client' vérifie le mot de passe actuel pour le guard 'client'
+            'new_password' => 'nullable|min:8|confirmed', // 'confirmed' vérifie la correspondance avec new_password_confirmation
+        ]);
+
+        $client->name = $request->input('name');
+        $client->email = $request->input('email');
+        $client->phone = $request->input('phone');
+        $client->address = $request->input('address');
+
+        if ($request->filled('new_password')) {
+            $client->password = Hash::make($request->input('new_password'));
+        }
+
+        $client->save();
+
+        return redirect()->back()->with('success', 'Votre profil a été mis à jour avec succès !');
+    }
+
+    // Méthode pour afficher l'historique des Yums du client
+    public function yumsHistory()
+    {
+        $client = Auth::guard('client')->user();
+        // Ici, vous devriez récupérer les transactions de Yums du client.
+        // Cela suppose que vous avez une relation `yumsTransactions` définie dans votre modèle Client.
+        // Exemple : un modèle `YumTransaction` lié au client.
+        // Si vous n'avez pas de table de transactions, vous pourriez simplement passer le solde.
+        
+        // Exemple avec une relation `yumsTransactions` :
+        $yumsTransactions = $client->yumsTransactions()->latest()->get(); 
+
+        // Si vous n'avez pas de table de transactions dédiée, vous pouvez passer une collection vide
+        // $yumsTransactions = collect(); 
+
+        return view('client.yums_history', compact('client', 'yumsTransactions'));
     }
 }

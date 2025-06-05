@@ -1,18 +1,16 @@
 @extends('master')
 @section('guest')
     <title>Resto - Reservation</title>
-    
-    <!-- Section titre de la page -->
+
     <div class="page-title-section">
         <div class="container">
-        </div>
+            </div>
     </div>
 
     <main class="main-content">
         <div class="container margin_detail">
             <div class="row">
                 <div class="col-lg-8">
-                    <!-- Informations du restaurant -->
                     <div class="content-card">
                         <div class="restaurant-info">
                             <h2>{{ $restaurant->name }}</h2>
@@ -72,16 +70,13 @@
                         @endif
                     </div>
 
-                    <!-- Section commentaires -->
                     <div class="content-card">
                         <div class="comment-section">
                             <h3><i class="fas fa-comments"></i> Avis et commentaires</h3>
-                            
-                            <!-- Formulaire de commentaire -->
+
                             @auth('client')
                                 <div class="comment-form" id="comment-form-container">
-                                    <!-- Le formulaire sera affiché dynamiquement via JavaScript -->
-                                </div>
+                                    </div>
                             @else
                                 <div class="comment-form">
                                     <div class="alert alert-info">
@@ -90,11 +85,10 @@
                                     </div>
                                 </div>
                             @endauth
-                            
-                            <!-- Liste des commentaires -->
+
                             <div class="comments-list">
                                 <h4>{{ count($comments) }} Avis</h4>
-                                
+
                                 @foreach ($comments as $comment)
                                 <div class="comment-item">
                                     <div class="row">
@@ -117,7 +111,7 @@
                                     </div>
                                 </div>
                                 @endforeach
-                                
+
                                 @if($comments->count() == 0)
                                     <div class="no-comments">
                                         <p><i class="fas fa-comment-slash"></i> Aucun avis pour le moment. Soyez le premier à partager votre expérience !</p>
@@ -127,8 +121,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Colonne de réservation -->
+
                 <div class="col-lg-4" id="sidebar_fixed">
                     <div class="content-card reservation-card">
                         <div class="reservation-header">
@@ -137,7 +130,7 @@
                                 <i class="fas fa-gift"></i> +{{ $restaurant->yums }} yums offerts
                             </div>
                         </div>
-                        
+
                         <div class="reservation-form">
                             <form method="post" action="{{ route('client.reservation.create') }}" id="reservationForm">
                                 @if ($errors->any())
@@ -164,78 +157,87 @@
                                 @csrf
                                 <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}">
                                 <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
-                                {{-- SUPPRIMER CETTE LIGNE : <input type="hidden" name="guest_number" id="guest_number_input"> --}}
 
-                                <!-- Date de réservation -->
                                 <div class="form-group">
                                     <label><i class="fas fa-calendar-alt"></i> Date</label>
                                     <input required class="form-control date-input" type="date" name="reservation_date"
                                         min="{{ date('Y-m-d') }}" id="reservation_date">
                                 </div>
 
-                                <!-- Heure de réservation -->
                                 <div class="form-group">
                                     <label><i class="fas fa-clock"></i> Heure</label>
                                     <div class="time-slots">
+                                        {{-- NOUVELLE CATÉGORIE : PETIT DÉJEUNER --}}
+                                        <div class="time-category">
+                                            <h5>Petit Déjeuner</h5>
+                                            <div class="time-options">
+                                                @php
+                                                    $breakfast_start = strtotime('08:00');
+                                                    $breakfast_end = strtotime('11:00');
+                                                    $interval = 30 * 60; // 30 minutes in seconds
+                                                @endphp
+                                                @for ($time = $breakfast_start; $time <= $breakfast_end; $time += $interval)
+                                                    <div class="time-option">
+                                                        <input type="radio" id="time_pb_{{ date('Hi', $time) }}" name="reservation_time" value="{{ date('H:i:s', $time) }}">
+                                                        <label for="time_pb_{{ date('Hi', $time) }}">{{ date('H:i', $time) }}</label>
+                                                    </div>
+                                                @endfor
+                                            </div>
+                                        </div>
+
+                                        {{-- CATÉGORIE DÉJEUNER MISE À JOUR --}}
                                         <div class="time-category">
                                             <h5>Déjeuner</h5>
                                             <div class="time-options">
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_1" name="reservation_time" value="12:00:00">
-                                                    <label for="time_1">12:00</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_2" name="reservation_time" value="12:30:00">
-                                                    <label for="time_2">12:30</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_3" name="reservation_time" value="13:00:00">
-                                                    <label for="time_3">13:00</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_4" name="reservation_time" value="13:30:00">
-                                                    <label for="time_4">13:30</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_5" name="reservation_time" value="14:00:00">
-                                                    <label for="time_5">14:00</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_6" name="reservation_time" value="14:30:00">
-                                                    <label for="time_6">14:30</label>
-                                                </div>
+                                                @php
+                                                    $lunch_start = strtotime('12:00');
+                                                    $lunch_end = strtotime('15:00');
+                                                @endphp
+                                                @for ($time = $lunch_start; $time <= $lunch_end; $time += $interval)
+                                                    <div class="time-option">
+                                                        <input type="radio" id="time_l_{{ date('Hi', $time) }}" name="reservation_time" value="{{ date('H:i:s', $time) }}">
+                                                        <label for="time_l_{{ date('Hi', $time) }}">{{ date('H:i', $time) }}</label>
+                                                    </div>
+                                                @endfor
                                             </div>
                                         </div>
-                                        
+
+                                        {{-- AJOUT D'UNE CATÉGORIE APRÈS-MIDI (OPTIONNEL) --}}
+                                        <div class="time-category">
+                                            <h5>Après-midi</h5>
+                                            <div class="time-options">
+                                                @php
+                                                    $afternoon_start = strtotime('15:30');
+                                                    $afternoon_end = strtotime('18:30');
+                                                @endphp
+                                                @for ($time = $afternoon_start; $time <= $afternoon_end; $time += $interval)
+                                                    <div class="time-option">
+                                                        <input type="radio" id="time_a_{{ date('Hi', $time) }}" name="reservation_time" value="{{ date('H:i:s', $time) }}">
+                                                        <label for="time_a_{{ date('Hi', $time) }}">{{ date('H:i', $time) }}</label>
+                                                    </div>
+                                                @endfor
+                                            </div>
+                                        </div>
+
+                                        {{-- CATÉGORIE DÎNER MISE À JOUR --}}
                                         <div class="time-category">
                                             <h5>Dîner</h5>
                                             <div class="time-options">
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_11" name="reservation_time" value="20:00:00">
-                                                    <label for="time_11">20:00</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_12" name="reservation_time" value="20:30:00">
-                                                    <label for="time_12">20:30</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_13" name="reservation_time" value="21:00:00">
-                                                    <label for="time_13">21:00</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_14" name="reservation_time" value="21:30:00">
-                                                    <label for="time_14">21:30</label>
-                                                </div>
-                                                <div class="time-option">
-                                                    <input type="radio" id="time_15" name="reservation_time" value="22:00:00">
-                                                    <label for="time_15">22:00</label>
-                                                </div>
+                                                @php
+                                                    $dinner_start = strtotime('19:00');
+                                                    $dinner_end = strtotime('23:00'); // Extended to 23:00 (11 PM)
+                                                @endphp
+                                                @for ($time = $dinner_start; $time <= $dinner_end; $time += $interval)
+                                                    <div class="time-option">
+                                                        <input type="radio" id="time_d_{{ date('Hi', $time) }}" name="reservation_time" value="{{ date('H:i:s', $time) }}">
+                                                        <label for="time_d_{{ date('Hi', $time) }}">{{ date('H:i', $time) }}</label>
+                                                    </div>
+                                                @endfor
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Sélection de table -->
                                 <div class="form-group">
                                     <label><i class="fas fa-users"></i> Table</label>
                                     <div class="table-options" id="table-options">
@@ -243,41 +245,31 @@
                                     </div>
                                 </div>
 
-                                <!-- Coordonnées -->
                                 <div class="form-group">
                                     <label><i class="fas fa-envelope"></i> Email</label>
                                     <input class="form-control" required type="email" name="reservation_email"
                                         @if (Auth::guard('client')->check()) value="{{ Auth::guard('client')->user()->email }}" @else placeholder="Votre email" @endif>
                                 </div>
-                                
-                                {{-- SUPPRIMER CES LIGNES DUPLIQUÉES --}}
-                                {{-- <input type="hidden" name="client_id" value="{{ Auth::guard('client')->id() }}"> --}}
-                                {{-- <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}"> --}}
-                                {{-- <input type="hidden" name="guest_number" id="guest_number_input">  --}}
-                                
+
                                 <div class="form-group">
                                     <label for="reservation_tele">Téléphone *</label>
-                                    <input type="text" id="reservation_tele" name="reservation_tele" class="form-control"
-                                        value="{{ old('reservation_tele', Auth::guard('client')->user()->tele) }}" required>
+                                    <input type="text" id="reservation_tele" name="reservation_tele" class="form-control" required>
                                     @error('reservation_tele')
                                         <div class="alert alert-danger">{{ $message }}</div>
                                     @enderror
-                                {{-- CORRECTION DE LA BALISE DIV MAL FERMÉE --}}
-                                </div> 
-                                {{-- <div class="form-group"></div> --}} {{-- SUPPRIMER CETTE LIGNE --}}
+                                </div>
 
-                                <!-- Bouton de réservation -->
                                 <button type="submit" class="btn-primary-custom btn-block">
                                     <i class="fas fa-check-circle"></i> Réserver maintenant
                                 </button>
-                                
+
                                 <div class="reservation-info">
                                     <small><i class="fas fa-info-circle"></i> Aucun frais ne sera prélevé à cette étape</small>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    
+
                     <div class="content-card yums-info-card">
                         <div class="yums-info">
                             <i class="fas fa-award"></i>
@@ -290,11 +282,10 @@
     </main>
 
     <style>
-        /* Styles existants... */
         .restaurant-info {
             margin-bottom: 20px;
         }
-        
+
         .restaurant-meta {
             display: flex;
             flex-wrap: wrap;
@@ -302,69 +293,69 @@
             margin: 15px 0;
             color: #555;
         }
-        
+
         .restaurant-meta span {
             display: flex;
             align-items: center;
         }
-        
+
         .restaurant-meta i {
             margin-right: 5px;
             color: var(--primary-color);
         }
-        
+
         .restaurant-description {
             margin: 15px 0;
             line-height: 1.6;
         }
-        
+
         /* Menu section */
         .menu-section {
             margin-top: 10px;
         }
-        
+
         .menu-items {
             margin-top: 20px;
         }
-        
+
         .menu-item {
             padding: 15px;
             border-bottom: 1px solid #eee;
         }
-        
+
         .menu-item:last-child {
             border-bottom: none;
         }
-        
+
         .menu-item-details h4 {
             margin-bottom: 5px;
             color: var(--text-dark);
         }
-        
+
         .menu-item-price {
             font-weight: 600;
             color: var(--primary-color);
         }
-        
+
         .menu-empty {
             padding: 20px;
             background-color: #f9f9f9;
             border-radius: 8px;
             text-align: center;
         }
-        
+
         /* Comment section */
         .comment-section {
             margin-top: 10px;
         }
-        
+
         .comment-form {
             margin: 20px 0;
             padding: 20px;
             background-color: #f9f9f9;
             border-radius: 8px;
         }
-        
+
         /* Système de notation par étoiles */
         .rating-input {
             display: flex;
@@ -372,158 +363,162 @@
             gap: 10px;
             margin: 15px 0;
         }
-        
+
         .star-rating {
             display: flex;
             gap: 5px;
         }
-        
+
         .star-rating input[type="radio"] {
             display: none;
         }
-        
+
         .star-rating label {
             font-size: 1.8rem;
             color: #ddd;
             cursor: pointer;
             transition: color 0.2s ease;
         }
-        
+
         .star-rating label:hover,
         .star-rating label.hover {
             color: #ffd700;
         }
-        
+
         .star-rating input[type="radio"]:checked + label,
         .star-rating label.active {
             color: #ffd700;
         }
-        
+
         .rating-stars {
             display: flex;
             align-items: center;
             gap: 5px;
             margin-bottom: 10px;
         }
-        
+
         .star-filled {
             color: #ffd700;
         }
-        
+
         .star-empty {
             color: #ddd;
         }
-        
+
         .rating-text {
             margin-left: 10px;
             color: #777;
             font-weight: 500;
         }
-        
+
         .comments-list {
             margin-top: 30px;
         }
-        
+
         .comment-item {
             padding: 20px 0;
             border-bottom: 1px solid #eee;
         }
-        
+
         .comment-item:last-child {
             border-bottom: none;
         }
-        
+
         .user-avatar {
             width: 60px;
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
         }
-        
+
         .user-info {
             text-align: center;
         }
-        
+
         .comment-meta {
             margin-bottom: 10px;
             color: #777;
             font-size: 0.9rem;
         }
-        
+
         .no-comments {
             text-align: center;
             padding: 40px 20px;
             color: #777;
         }
-        
+
         .alert {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
-        
+
         .alert-info {
             background-color: #d1ecf1;
             border: 1px solid #bee5eb;
             color: #0c5460;
         }
-        
+
         .alert-warning {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;
         }
-        
-        /* Styles pour la réservation (inchangés) */
+
         .reservation-card {
             position: sticky;
             top: 100px;
         }
-        
+
         .reservation-header {
             margin-bottom: 20px;
             border-bottom: 2px solid var(--primary-light);
             padding-bottom: 15px;
         }
-        
+
         .yums-offer {
             margin-top: 10px;
             color: var(--primary-color);
             font-weight: 500;
         }
-        
+
         .yums-offer i {
             margin-right: 5px;
         }
-        
+
         .time-slots {
             margin: 15px 0;
+            /* Added some bottom margin for spacing between categories */
+            margin-bottom: 30px;
         }
-        
+
         .time-category {
             margin-bottom: 15px;
         }
-        
+
         .time-category h5 {
             margin-bottom: 10px;
             color: var(--text-dark);
+            border-bottom: 1px solid #eee; /* Added a subtle separator */
+            padding-bottom: 5px;
+            font-size: 1.1em;
         }
-        
+
         .time-options {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
-        
+
         .time-option {
             position: relative;
         }
-        
+
         .time-option input[type="radio"] {
             position: absolute;
             opacity: 0;
         }
-        
+
         .time-option label {
             display: block;
             padding: 8px 15px;
@@ -531,19 +526,26 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-size: 0.95rem; /* Slightly adjust font size for compactness */
         }
-        
+
         .time-option input[type="radio"]:checked + label {
             background-color: var(--primary-color);
             color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow on selected */
         }
-        
+
+        .time-option label:hover {
+            background-color: #e0e0e0;
+        }
+
         .table-options {
             margin: 15px 0;
             max-height: 250px;
             overflow-y: auto;
+            padding-right: 10px; /* For scrollbar spacing */
         }
-        
+
         .table-option {
             padding: 12px;
             margin-bottom: 10px;
@@ -552,70 +554,293 @@
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
+            border: 1px solid #e0e0e0; /* Subtle border */
         }
-        
+
         .table-option.available {
             background-color: #d1fae5;
             border: 1px solid #10b981;
         }
-        
+
         .table-option.reserved {
             background-color: #fee2e2;
             border: 1px solid #ef4444;
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
+
         .table-option input[type="radio"] {
             position: absolute;
             opacity: 0;
         }
-        
+
         .table-option input[type="radio"]:checked + label {
             box-shadow: 0 0 0 2px var(--primary-color);
         }
-        
+        .table-option label { /* Ensure the label itself fills the table-option for better click area */
+            display: block;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .table-option-content { /* To ensure content is visible */
+            position: relative;
+            z-index: 1;
+        }
+
         .table-option-details {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #333;
         }
-        
+
+        .table-status {
+            font-size: 0.9em;
+        }
+        .table-option.available .table-status {
+            color: #10b981;
+        }
+        .table-option.reserved .table-status {
+            color: #ef4444;
+        }
+
+
         .table-option-location {
             color: #777;
             font-size: 0.9rem;
+            margin-top: 5px;
         }
-        
+
         .select-date-time-message {
             text-align: center;
             color: #777;
             padding: 20px 0;
         }
-        
+
         .reservation-info {
             text-align: center;
             margin-top: 15px;
             color: #777;
         }
-        
+
         .yums-info-card {
             margin-top: 20px;
         }
-        
+
         .yums-info {
             display: flex;
             align-items: center;
             gap: 15px;
+            padding: 15px;
+            background-color: #f0fbf8; /* A very light green background */
+            border-radius: 8px;
+            border: 1px solid #c7f2e1;
         }
-        
+
         .yums-info i {
             font-size: 1.8rem;
             color: var(--primary-color);
         }
-        
+
         .btn-block {
             display: block;
             width: 100%;
         }
+
+        .menu-item-photo {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px; /* Slightly more rounded corners for images */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow on menu images */
+        }
+        .menu-item-name {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 600; /* Make menu item names a bit bolder */
+        }
+        .menu-category h4 {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-dark); /* Use a darker primary color for section titles */
+            font-size: 1.4em;
+        }
+        .content-card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Stronger, softer shadow for content cards */
+            margin-bottom: 20px;
+        }
+        h2, h3 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Nouveaux styles pour la grille des tables */
+    .table-options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* 2 ou 3 colonnes selon la taille de l'écran */
+        gap: 15px; /* Espacement entre les cartes de table */
+        margin-top: 15px;
+        max-height: 350px; /* Limite la hauteur et ajoute une scrollbar si nécessaire */
+        overflow-y: auto;
+        padding-right: 10px; /* Espace pour la scrollbar */
+        padding-bottom: 5px; /* Pour éviter que le contenu ne soit coupé par la scrollbar */
+    }
+
+    .table-item {
+        background-color: #f8f9fa; /* Fond léger */
+        border: 1px solid #e0e0e0;
+        border-radius: 10px; /* Bords plus arrondis */
+        padding: 15px;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        position: relative; /* Pour positionner le radio input */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Ombre légère */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px; /* Hauteur minimale pour chaque carte */
+    }
+
+    .table-item input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none; /* Rendre le radio invisible et non cliquable directement */
+    }
+
+    .table-item label {
+        display: block;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1; /* Pour que le label soit cliquable sur toute la carte */
+    }
+
+    .table-item.available {
+        border-color: #a7f3d0; /* Vert clair pour disponible */
+        background-color: #ecfdf5; /* Fond très léger pour disponible */
+    }
+
+    .table-item.available:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2); /* Ombre plus prononcée au survol */
+        border-color: var(--primary-color);
+    }
+
+    .table-item.selected {
+        border-color: var(--primary-color); /* Couleur primaire pour la sélection */
+        box-shadow: 0 0 0 3px var(--primary-light), 0 6px 15px rgba(16, 185, 129, 0.3); /* Anneau de sélection et ombre */
+        background-color: #d1fae5; /* Fond un peu plus vert pour la sélection */
+    }
+
+    .table-item.reserved {
+        border-color: #fca5a5; /* Rouge clair pour réservé */
+        background-color: #fef2f2; /* Fond très léger pour réservé */
+        opacity: 0.7;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .table-item-icon {
+        font-size: 2.2rem; /* Plus grande icône */
+        margin-bottom: 10px;
+        color: #6b7280; /* Couleur neutre pour l'icône par défaut */
+    }
+
+    .table-item.available .table-item-icon {
+        color: var(--primary-dark); /* Vert foncé pour icône disponible */
+    }
+    .table-item.selected .table-item-icon {
+        color: var(--primary-dark); /* Même couleur pour l'icône sélectionnée */
+    }
+
+    .table-item.reserved .table-item-icon {
+        color: #dc2626; /* Rouge pour icône réservée */
+    }
+
+    .table-item-capacity {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 5px;
+    }
+
+    .table-item-location {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 10px;
+    }
+
+    .table-item-status {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-top: auto; /* Pousse le statut vers le bas */
+    }
+
+    .table-item.available .table-item-status {
+        color: #059669; /* Vert foncé pour le texte disponible */
+        background-color: #d1fae5; /* Vert très clair pour le fond */
+    }
+
+    .table-item.reserved .table-item-status {
+        color: #b91c1c; /* Rouge foncé pour le texte réservé */
+        background-color: #fee2e2; /* Rouge très clair pour le fond */
+    }
+
+    /* Message en l'absence de tables ou avant sélection */
+    .select-date-time-message {
+        text-align: center;
+        color: #777;
+        padding: 20px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        margin-top: 15px;
+    }
+
+    /* Styles pour la radio button list d'origine, à supprimer ou surcharger */
+    /* Assurez-vous que ces styles ne se chevauchent pas avec les nouveaux */
+    .table-option { /* Cet ancien style doit être neutralisé ou supprimé */
+        /* display: none; si vous voulez les masquer complètement */
+        /* Ou, assurez-vous que vos nouveaux styles prennent le dessus */
+    }
+
     </style>
 
     <script>
@@ -625,20 +850,12 @@
         const tableOptionsContainer = document.getElementById('table-options');
         const reservationForm = document.getElementById('reservationForm');
         const commentFormContainer = document.getElementById('comment-form-container');
-        
-        // Initialisation de guestNumberInput une fois le DOM chargé
-        // guestNumberInput n'est plus nécessaire ici car le champ hidden est supprimé
-        // const guestNumberInput = document.getElementById('guest_number_input'); // SUPPRIMER CETTE LIGNE
-        // console.log('1. DOMContentLoaded: guestNumberInput trouvé?', guestNumberInput ? 'Oui' : 'Non', 'ID:', guestNumberInput ? guestNumberInput.id : 'N/A');
-        // if (guestNumberInput) {
-        //     console.log('2. DOMContentLoaded: Valeur initiale de guestNumberInput:', guestNumberInput.value);
-        // }
 
         // Vérifier si le client peut commenter
         @auth('client')
         checkCommentPermission();
         @endauth
-        
+
         function checkCommentPermission() {
             fetch(`/api/check-comment-permission/{{ $restaurant->id }}`, {
                 headers: {
@@ -658,13 +875,13 @@
                 console.error('Erreur lors de la vérification des permissions de commentaire:', error);
             });
         }
-        
+
         function showCommentForm() {
             commentFormContainer.innerHTML = `
                 <form action="{{ route('comments.store') }}" method="POST" id="commentForm">
                     @csrf
                     <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
-                    
+
                     <div class="form-group">
                         <label for="rating">Votre note *</label>
                         <div class="rating-input">
@@ -683,24 +900,24 @@
                             <span id="rating-text">Cliquez pour noter</span>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="content">Votre avis *</label>
                         <textarea name="content" id="content" required class="form-control" rows="4"
                             placeholder="Partagez votre expérience pour aider les autres utilisateurs" maxlength="1000"></textarea>
                         <small class="form-text text-muted">Maximum 1000 caractères</small>
                     </div>
-                    
+
                     <button type="submit" class="btn-primary-custom">
                         <i class="fas fa-paper-plane"></i> Publier mon avis
                     </button>
                 </form>
             `;
-            
+
             // Initialiser le système d'étoiles
             initStarRating();
         }
-        
+
         function showCommentMessage(message) {
             commentFormContainer.innerHTML = `
                 <div class="alert alert-warning">
@@ -709,22 +926,22 @@
                 </div>
             `;
         }
-        
+
         function initStarRating() {
             const starRating = document.getElementById('star-rating');
             const ratingText = document.getElementById('rating-text');
             const stars = starRating.querySelectorAll('label');
             const radioButtons = starRating.querySelectorAll('input[type="radio"]');
-            
+
             // Messages pour chaque note
             const ratingMessages = {
                 1: "Très décevant",
-                2: "Décevant", 
+                2: "Décevant",
                 3: "Correct",
                 4: "Très bien",
                 5: "Excellent"
             };
-            
+
             stars.forEach((star, index) => {
                 // Survol des étoiles
                 star.addEventListener('mouseenter', function() {
@@ -732,7 +949,7 @@
                     highlightStars(value);
                     ratingText.textContent = ratingMessages[value];
                 });
-                
+
                 // Clic sur les étoiles
                 star.addEventListener('click', function() {
                     const value = this.getAttribute('data-value');
@@ -742,7 +959,7 @@
                     ratingText.style.color = '#ffd700';
                 });
             });
-            
+
             // Réinitialiser au survol de sortie
             starRating.addEventListener('mouseleave', function() {
                 const checkedStar = starRating.querySelector('input[type="radio"]:checked');
@@ -757,7 +974,7 @@
                     ratingText.style.color = '#777';
                 }
             });
-            
+
             function highlightStars(rating) {
                 stars.forEach((star, index) => {
                     const starValue = star.getAttribute('data-value');
@@ -768,14 +985,14 @@
                     }
                 });
             }
-            
+
             function resetStars() {
                 stars.forEach(star => {
                     star.style.color = '#ddd';
                 });
             }
         }
-        
+
         // Fonction pour mettre à jour les tables disponibles
         function updateAvailableTables() {
             const selectedDate = dateInput.value;
@@ -788,16 +1005,8 @@
                 }
             }
 
-            console.log("3. updateAvailableTables: Date sélectionnée:", selectedDate);
-            console.log("4. updateAvailableTables: Heure sélectionnée:", selectedTime);
-
             if (!selectedDate || !selectedTime) {
                 tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Veuillez d\'abord sélectionner une date et une heure</p>';
-                // guestNumberInput n'est plus pertinent ici
-                // if (guestNumberInput) {
-                //     guestNumberInput.value = ''; 
-                //     console.log('5. updateAvailableTables: guest_number réinitialisé (date/heure manquantes):', guestNumberInput.value);
-                // }
                 return;
             }
 
@@ -816,8 +1025,6 @@
                 return response.json();
             })
             .then(data => {
-                console.log("6. Données reçues de l'API:", data);
-
                 tableOptionsContainer.innerHTML = '';
 
                 const availableTables = data.tables || [];
@@ -825,11 +1032,6 @@
 
                 if (availableTables.length === 0) {
                     tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure</p>';
-                    // guestNumberInput n'est plus pertinent ici
-                    // if (guestNumberInput) {
-                    //     guestNumberInput.value = ''; 
-                    //     console.log('7. updateAvailableTables: guest_number réinitialisé (aucune table disponible):', guestNumberInput.value);
-                    // }
                     return;
                 }
 
@@ -893,12 +1095,6 @@
                                         el.style.boxShadow = 'none';
                                     });
                                     this.style.boxShadow = '0 0 0 2px var(--primary-color)';
-
-                                    // guestNumberInput n'est plus pertinent ici
-                                    // if (guestNumberInput) {
-                                    //     guestNumberInput.value = guestNumber;
-                                    //     console.log('8. guest_number mis à jour via clic:', guestNumberInput.value);
-                                    // }
                                 }
                             });
                         }
@@ -909,37 +1105,14 @@
 
                 // Sélectionner automatiquement la première table disponible
                 const firstAvailableRadio = tableOptionsContainer.querySelector('input[type="radio"]');
-                console.log('firstAvailableRadio found?', firstAvailableRadio ? 'Yes' : 'No'); 
                 if (firstAvailableRadio) {
                     firstAvailableRadio.checked = true;
                     firstAvailableRadio.closest('.table-option').style.boxShadow = '0 0 0 2px var(--primary-color)';
-                    
-                    const selectedTableId = firstAvailableRadio.value;
-                    const selectedTable = availableTables.find(t => t.id == selectedTableId);
-                    
-                    // guestNumberInput n'est plus pertinent ici
-                    // if (selectedTable && guestNumberInput) {
-                    //     guestNumberInput.value = selectedTable.guest_number || selectedTable.capacity || 1;
-                    //     console.log('9. guest_number mis à jour via sélection auto:', guestNumberInput.value);
-                    // } else { 
-                    //     console.log('9.1. Auto-selection: selectedTable ou guestNumberInput est null/undefined.', { selectedTable, guestNumberInput });
-                    // }
-                } else {
-                    // guestNumberInput n'est plus pertinent ici
-                    // if (guestNumberInput) {
-                    //     guestNumberInput.value = ''; 
-                    //     console.log('10. updateAvailableTables: guest_number réinitialisé (aucune table auto-sélectionnée):', guestNumberInput.value);
-                    // }
                 }
             })
             .catch(error => {
-                console.error("11. Erreur lors de la récupération des tables :", error);
+                console.error("Erreur lors de la récupération des tables :", error);
                 tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Erreur lors du chargement des tables. Veuillez réessayer.</p>';
-                // guestNumberInput n'est plus pertinent ici
-                // if (guestNumberInput) {
-                //     guestNumberInput.value = ''; 
-                //     console.log('12. updateAvailableTables: guest_number réinitialisé (erreur API):', guestNumberInput.value);
-                // }
             });
         }
         // Événements pour la réservation
@@ -950,15 +1123,6 @@
 
         // Validation du formulaire de réservation
         reservationForm.addEventListener('submit', function(event) {
-            console.log('13. Soumission du formulaire détectée.');
-            // guestNumberInput n'est plus pertinent ici, on ne le valide plus côté client
-            // const currentGuestNumberInput = document.getElementById('guest_number_input');
-            
-            // console.log('14. Valeur de guestNumberInput.value AVANT soumission:', currentGuestNumberInput ? currentGuestNumberInput.value : 'guestNumberInput non trouvé');
-            // console.log('14.1. currentGuestNumberInput est-il null?', currentGuestNumberInput === null); 
-            // console.log('14.2. currentGuestNumberInput est-il undefined?', typeof currentGuestNumberInput === 'undefined'); 
-
-
             const selectedTable = document.querySelector('input[name="table_id"]:checked');
             const selectedDate = dateInput.value;
             let selectedTime = null;
@@ -973,37 +1137,11 @@
             if (!selectedDate || !selectedTime || !selectedTable) {
                 event.preventDefault();
                 alert('Veuillez sélectionner une date, une heure et une table pour effectuer votre réservation.');
-                console.log('15. Soumission bloquée: Date, heure ou table manquante.');
                 return;
             }
-            
-            // SUPPRIMER CETTE VALIDATION JAVASCRIPT POUR guest_number
-            // if (!currentGuestNumberInput || currentGuestNumberInput.value === '' || isNaN(parseInt(currentGuestNumberInput.value)) || parseInt(currentGuestNumberInput.value) < 1) {
-            //     event.preventDefault();
-            //     alert('Le nombre d\'invités n\'a pas pu être déterminé ou est invalide. Veuillez sélectionner une table.');
-            //     console.log('16. Soumission bloquée: guest_number invalide ou non déterminé.');
-            //     return;
-            // }
-            console.log('17. Validation JavaScript passée. Tentative de soumission du formulaire.');
         });
 
         console.log("Script de réservation chargé avec système de commentaires");
     });
     </script>
-    <style>
-        .menu-item-photo {
-            width: 100%;
-            height: 150px; /* Ajustez la hauteur selon vos préférences */
-            object-fit: cover; /* Assure que l'image couvre la zone sans déformation */
-        }
-        .menu-item-name {
-            font-size: 1.1em;
-            color: #333;
-        }
-        .menu-category h4 {
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-    </style>
 @endsection

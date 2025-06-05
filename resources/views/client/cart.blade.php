@@ -1,52 +1,98 @@
+<?php
+use Illuminate\Support\Facades\Auth;
+?>
 
 @extends('master')
 
 @section('guest')
 <title>Resto - Mon Panier</title>
 
-<!-- Page Title Section -->
 <div class="page-title-section">
     <div class="container">
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="main-content">
     <div class="container-custom">
         @if(count($cart) > 0)
-        <div class="cart-items">
-    @foreach ($cart as $menu)
-        <div class="content-card cart-item">
-            <div class="cart-item-header">
-                <i class="fas fa-utensils"></i>
-                <h3>{{ $menu['name'] }}</h3>
-            </div>
-            <div class="cart-item-content">
-                <div class="cart-quantity">
-                    <span class="quantity-label">Quantité</span>
-                    <span class="quantity-value">{{ $menu['quantity'] }}</span>
-                </div>
-                
-                <div class="plat-list">
-                    <div class="plat-item">
-                        <div class="plat-info">
-                            <i class="fas fa-leaf"></i>
-                            <span>{{ $menu['name'] }}</span>
+            <div class="cart-items">
+                @foreach ($cart as $menu)
+                    <div class="content-card cart-item">
+                        <div class="cart-item-header">
+                            <i class="fas fa-utensils"></i>
+                            <h3>{{ $menu['name'] }}</h3>
                         </div>
-                        <div class="plat-price">{{ number_format($menu['price'], 0, ',', ' ') }} XOF</div>
+                        <div class="cart-item-content">
+                            <div class="cart-quantity">
+                                <span class="quantity-label">Quantité</span>
+                                <span class="quantity-value">{{ $menu['quantity'] }}</span>
+                            </div>
+                            <div class="plat-list">
+                                <div class="plat-item">
+                                    <div class="plat-info">
+                                        <i class="fas fa-leaf"></i>
+                                        <span>{{ $menu['name'] }}</span>
+                                    </div>
+                                    <div class="plat-price">{{ number_format($menu['price'], 0, ',', ' ') }} XOF</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                @endforeach
             </div>
-        </div>
-    @endforeach
-</div>
-
 
             @php
-                $serviceFee = $total * 0.1;
-                $grandTotal = $total + $serviceFee;
-            @endphp
+                $subtotal = 0;
+                foreach ($cart as $menu) {
+                    $subtotal += $menu['price'] * $menu['quantity'];
+                }
+                
+                // --- Calcul des frais de service (10% du sous-total) ---
+                $serviceFeePercentage = 0.10;
+                $serviceFee = round($subtotal * $serviceFeePercentage);
 
+                // Le total de la commande avant la déduction des Yums
+                // C'est le sous-total + les frais de service
+                $totalBeforeYums = $subtotal + $serviceFee;
+
+                // --- LOGIQUE POUR LES YUMS ---
+                $client = Auth::guard('client')->user();
+                $availableYums = $client->yums ?? 0;
+                $yumsIncrement = 100;
+                $yumsValuePerIncrement = 1000;
+                
+                // NOUVELLE CONTRAINTE: Montant minimum de la commande pour utiliser les Yums
+                $minOrderAmountForYums = 2000; // XOF
+                $canUseYums = $totalBeforeYums >= $minOrderAmountForYums;
+
+                // NOUVELLE CONTRAINTE: L'utilisateur ne peut utiliser que 100 Yums max par commande
+                $maxAllowedYumsPerOrder = 100;
+
+                // Calcul du montant maximal de Yums que le client peut utiliser basé sur son solde
+                // Et la limite par commande, et si la commande atteint le minimum requis
+                $maxYumsUsableFromBalance = floor($availableYums / $yumsIncrement) * $yumsIncrement; // Toujours un multiple de 100
+                
+                // Assurer que le client ne peut pas demander plus de 100 Yums
+                if ($maxYumsUsableFromBalance > $maxAllowedYumsPerOrder) {
+                    $maxYumsUsableFromBalance = $maxAllowedYumsPerOrder;
+                }
+
+                // Calcul du montant maximal de Yums qui ne dépasse pas le total à payer (avec frais de service)
+                $maxDiscountAmountPossible = $totalBeforeYums; 
+                $maxYumsUsableFromOrderValue = floor($maxDiscountAmountPossible / $yumsValuePerIncrement) * $yumsIncrement;
+                
+                // La quantité maximale de Yums utilisable est le minimum de toutes les contraintes
+                $maxYumsToUse = min($maxYumsUsableFromBalance, $maxYumsUsableFromOrderValue);
+
+                // Si la commande n'atteint pas le montant minimum, on ne peut pas utiliser de Yums
+                if (!$canUseYums) {
+                    $maxYumsToUse = 0;
+                }
+
+                // Le total initial affiché sans réduction Yums
+                $total = $totalBeforeYums; 
+            @endphp
+            
             <div class="content-card payment-section">
                 <div class="payment-header">
                     <h2>Récapitulatif de la commande</h2>
@@ -55,42 +101,100 @@
                 <div class="payment-details">
                     <div class="fee-item">
                         <span>Sous-total</span>
-                        <span>{{ number_format($total, 0, ',', ' ') }} XOF</span>
+                        <span>{{ number_format($subtotal, 0, ',', ' ') }} XOF</span>
                     </div>
-                    <div class="fee-item">
-                        <span>Frais de service (10%)</span>
-                        <span>{{ number_format($serviceFee, 0, ',', ' ') }} XOF</span>
+                    <div class="fee-item" style="color: #e02828; font-weight: 600;">
+                        <span>Frais de service ({{ number_format($serviceFeePercentage * 100) }}%)</span>
+                        <span>+ {{ number_format($serviceFee, 0, ',', ' ') }} XOF</span>
                     </div>
+
+                    {{-- SECTION POUR L'UTILISATION DES YUMS --}}
+                    @if ($availableYums > 0 && $canUseYums)
+                        <div class="fee-item yums-section">
+                            <span>Utiliser mes Yums (Solde: {{ $availableYums }} Yums)</span>
+                            <div class="yums-control">
+                                <select name="yums_to_use" id="yums_to_use" class="form-control" onchange="updateCartTotal()">
+                                    <option value="0">0 Yums (Aucune réduction)</option>
+                                    @for ($i = $yumsIncrement; $i <= $maxYumsToUse; $i += $yumsIncrement)
+                                        <option value="{{ $i }}">{{ $i }} Yums (- {{ number_format(($i / $yumsIncrement) * $yumsValuePerIncrement, 0, ',', ' ') }} XOF)</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fee-item discount-display">
+                            <span>Réduction Yums</span>
+                            <span id="yums_discount_display" class="text-success">- 0 XOF</span>
+                        </div>
+                    @else
+                        <div class="fee-item">
+                            <span>Yums disponibles</span>
+                            <span class="text-muted">{{ $availableYums }} Yums</span>
+                        </div>
+                        <div class="alert alert-info text-center mt-3 p-2 small">
+                            <i class="fas fa-info-circle me-1"></i> 
+                            @if ($availableYums == 0)
+                                Vous n'avez pas de Yums disponibles pour le moment.
+                            @elseif (!$canUseYums)
+                                Le montant de votre commande ({{ number_format($totalBeforeYums, 0, ',', ' ') }} XOF) est inférieur à {{ number_format($minOrderAmountForYums, 0, ',', ' ') }} XOF.
+                                Pour utiliser les Yums, votre commande doit être d'au moins {{ number_format($minOrderAmountForYums, 0, ',', ' ') }} XOF.
+                            @else
+                                Pour utiliser les Yums, votre commande doit être d'au moins {{ number_format($minOrderAmountForYums, 0, ',', ' ') }} XOF et vous pouvez utiliser un maximum de {{ $maxAllowedYumsPerOrder }} Yums.
+                            @endif
+                        </div>
+                    @endif
+
                     <div class="fee-item total">
-                        <span>Total</span>
-                        <span>{{ number_format($grandTotal, 0, ',', ' ') }} XOF</span>
+                        <span>Total à payer</span>
+                        <span id="final_total_display">{{ number_format($total, 0, ',', ' ') }} XOF</span>
                     </div>
                 </div>
                 
                 <div class="payment-form">
                     <h3>Informations de paiement</h3>
-                    <form action="{{ route('fedapay.pay') }}" method="POST" id="payment-form">
+                    {{-- Affichage des messages de session (success/error) --}}
+                    @if (session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    @if (session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form id="payment-form" action="{{ route('process.payment') }}" method="POST">
                         @csrf
+                        {{-- Ces champs cachés seront mis à jour par le JavaScript --}}
+                        <input type="hidden" name="amount" id="payment_amount_hidden" value="{{ $total }}">
+                        <input type="hidden" name="yums_used_on_payment" id="yums_used_on_payment_hidden" value="0">
+
                         <div class="form-grid">
                             <div class="form-group">
-                                <input type="text" name="firstname" class="form-control-custom" placeholder="Prénom" required>
+                                <input type="text" id="firstname" class="form-control-custom" name="firstname" value="{{ Auth::guard('client')->user()->name }}" placeholder="Prénom" required>
                             </div>
                             <div class="form-group">
-                                <input type="text" name="lastname" class="form-control-custom" placeholder="Nom" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="email" name="email" class="form-control-custom" placeholder="Email" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" name="phone" class="form-control-custom" placeholder="Téléphone (ex: 97000000)" required>
+                                <input type="text" id="lastname" class="form-control-custom" name="lastname" value="{{ Auth::guard('client')->user()->lastname ?? '' }}" placeholder="Nom" required>
                             </div>
                         </div>
 
-                        <input type="hidden" name="amount" value="{{ $grandTotal }}">
-
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <input type="email" id="email" class="form-control-custom" name="email" value="{{ Auth::guard('client')->user()->email }}" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="phone" class="form-control-custom" name="phone" value="{{ Auth::guard('client')->user()->phone ?? '' }}" placeholder="Téléphone (ex: 97000000)" required>
+                            </div>
+                        </div>
+                        
                         <button type="submit" class="btn-primary-custom payment-button">
                             <span class="spinner"></span>
-                            <span class="button-text">Payer</span>
+                            <span class="button-text">Payer maintenant</span>
                         </button>
                     </form>
                 </div>
@@ -262,6 +366,38 @@
         margin-top: 10px;
     }
 
+    /* Styles pour la section Yums existante */
+    .yums-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        /* border-top: 1px dashed #e2e8f0; -- Retiré car fee-item gère déjà le border-bottom */
+        margin-top: 5px; /* Ajustement de la marge */
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+    .yums-section select {
+        max-width: 200px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background-color: var(--background-light);
+        font-size: 0.95rem;
+    }
+    .discount-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        /* border-bottom: 1px dashed #e2e8f0; -- Retiré car fee-item gère déjà le border-bottom */
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+    .discount-display span:first-child {
+        color: var(--text-dark);
+    }
+
     .payment-form {
         margin-top: 30px;
     }
@@ -350,6 +486,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser le total au chargement de la page
+        updateCartTotal();
+
         const form = document.getElementById('payment-form');
         if (form) {
             form.addEventListener('submit', function() {
@@ -363,5 +502,88 @@
             });
         }
     });
+
+    function updateCartTotal() {
+        const subtotal = {{ $subtotal }};
+        
+        // --- Calcul des frais de service en JS ---
+        const serviceFeePercentage = 0.10;
+        const serviceFee = Math.round(subtotal * serviceFeePercentage);
+
+        // Le total de la commande avant la déduction des Yums
+        const totalBeforeYums = subtotal + serviceFee; 
+
+        // --- Paramètres des Yums et nouvelles contraintes ---
+        const yumsIncrement = {{ $yumsIncrement }};
+        const yumsValuePerIncrement = {{ $yumsValuePerIncrement }};
+        const minOrderAmountForYums = {{ $minOrderAmountForYums }};
+        const maxAllowedYumsPerOrder = {{ $maxAllowedYumsPerOrder }};
+        const availableYums = {{ $availableYums }};
+
+        const yumsToUseSelect = document.getElementById('yums_to_use');
+
+        let selectedYums = 0;
+        if (yumsToUseSelect) {
+            selectedYums = parseInt(yumsToUseSelect.value);
+        }
+
+        let yumsDiscount = (selectedYums / yumsIncrement) * yumsValuePerIncrement;
+        
+        // Appliquer les contraintes sur les Yums
+        let actualMaxYumsToUse = 0;
+        if (totalBeforeYums >= minOrderAmountForYums && availableYums > 0) {
+            // Maximum de Yums utilisables selon le solde
+            let maxYumsFromBalance = Math.floor(availableYums / yumsIncrement) * yumsIncrement;
+            // Ne pas dépasser la limite de 100 Yums par commande
+            if (maxYumsFromBalance > maxAllowedYumsPerOrder) {
+                maxYumsFromBalance = maxAllowedYumsPerOrder;
+            }
+            // Maximum de Yums utilisables selon le montant de la commande
+            let maxYumsFromOrderValue = Math.floor(totalBeforeYums / yumsValuePerIncrement) * yumsIncrement;
+
+            actualMaxYumsToUse = Math.min(maxYumsFromBalance, maxYumsFromOrderValue);
+        }
+
+        // Si les Yums sélectionnés dépassent la limite réelle, réinitialiser
+        if (selectedYums > actualMaxYumsToUse) {
+            selectedYums = actualMaxYumsToUse; // Ou 0 si on veut forcer la remise à zéro si invalidé
+            if (yumsToUseSelect) {
+                yumsToUseSelect.value = selectedYums; // Mettre à jour la sélection visuelle
+            }
+            yumsDiscount = (selectedYums / yumsIncrement) * yumsValuePerIncrement;
+        }
+
+
+        let finalTotal = totalBeforeYums - yumsDiscount;
+
+        // S'assurer que le total ne devienne pas négatif
+        if (finalTotal < 0) {
+            finalTotal = 0;
+            // Ajuster la réduction Yums si elle dépasse le total initial avec frais
+            yumsDiscount = totalBeforeYums;
+            // Ajuster les Yums réellement utilisés pour correspondre à cette réduction
+            selectedYums = Math.floor(yumsDiscount / yumsValuePerIncrement) * yumsIncrement;
+            if (yumsToUseSelect) {
+                yumsToUseSelect.value = selectedYums; // Mettre à jour la sélection visuelle
+            }
+        }
+
+        // Mettre à jour l'affichage de la réduction Yums
+        const yumsDiscountDisplay = document.getElementById('yums_discount_display');
+        if (yumsDiscountDisplay) {
+            yumsDiscountDisplay.textContent = '- ' + formatPrice(yumsDiscount) + ' XOF';
+        }
+        
+        // Mettre à jour l'affichage du total final
+        document.getElementById('final_total_display').textContent = formatPrice(finalTotal) + ' XOF';
+        
+        // Mettre à jour les champs cachés pour le contrôleur
+        document.getElementById('payment_amount_hidden').value = finalTotal;
+        document.getElementById('yums_used_on_payment_hidden').value = selectedYums;
+    }
+
+    function formatPrice(price) {
+        return price.toLocaleString('fr-FR', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
 </script>
 @endsection

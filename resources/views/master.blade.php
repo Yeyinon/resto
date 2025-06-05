@@ -8,7 +8,6 @@
     <meta name="author" content="Resto">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- GOOGLE WEB FONT -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
@@ -45,13 +44,10 @@
         }(window, document, localStorage);
     </script>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
-    <!-- BASE CSS -->
     <link href="{{ asset('assets-home/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/style.css') }}" rel="stylesheet">
-    <!-- SPECIFIC CSS -->
     <link href="{{ asset('assets-home/css/home.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/detail-page.css') }}" rel="stylesheet">
     <link href="{{ asset('assets-home/css/booking-sign_up.css') }}" rel="stylesheet">
@@ -257,7 +253,6 @@
 </head>
 
 <body>
-    <!-- Header -->
     <header class="header clearfix element_to_stick">
         <div class="container">
             <div id="logo">
@@ -284,8 +279,14 @@
                             <div class="dropdown-menu">
                                 <div class="dropdown-menu-content">
                                     <ul>
+                                        {{-- Nouvelle fonctionnalité : Mes Réservations --}}
+                                        <li><a href="{{ route('client.reservations') }}"><i class="icon_document"></i>Mes réservations</a></li>
+                                        {{-- Nouvelle fonctionnalité : Mon Profil --}}
+                                        <li><a href="{{ route('client.profile') }}"><i class="icon_cog"></i>Mon profil</a></li>
+                                        {{-- Nouvelle fonctionnalité : Mes Yums --}}
+                                        <li><a href="{{ route('client.yums_history') }}"><i class="icon_star"></i>Mes Yums</a></li>
                                         <li><a href="{{ route('client.logout') }}"><i class="icon_key"></i>Se
-                                                déconnecter</a></li>
+                                                    déconnecter</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -329,22 +330,19 @@
                         <li><a href="{{ route('restaurant.register') }}" target="_parent">Pourquoi Resto ?</a></li>
                         <li><a href="{{ route('view_all') }}" target="_parent">Découvrez les restaurants</a></li>
                         @endguest
-                        @auth('client')
+                        {{-- La ligne "Mes reservations" est déplacée dans le dropdown pour les clients connectés --}}
+                        {{-- @auth('client')
                         <li><a href="{{ route('client.reservations') }}" target="_parent">Mes reservations</a></li>
-                        @endauth
+                        @endauth --}}
                     </li>
                 </ul>
             </nav>
         </div>
     </header>
-    <!-- /Header -->
-
-    <!-- Main Content -->
     <div class="page-wrapper">
                 @yield('guest')
             </div>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="row">
@@ -353,7 +351,7 @@
                     <div class="collapse dont-collapse-sm links" id="collapse_1">
                         <ul>
                             <li><a href="{{ route('restaurant.register') }}">Êtes-vous un restaurant ? Pourquoi
-                                    soumettre à Resto?</a></li>
+                                        soumettre à Resto?</a></li>
                             <li><a href="{{ route('view_all') }}">Découvrez les restaurants disponibles</a></li>
                         </ul>
                     </div>
@@ -386,18 +384,10 @@
                     </div>
                 </div>
             </div>
-            <!-- /row-->
             <hr>
         </div>
     </footer>
-    <!--/footer-->
-
-    <div id="toTop"></div><!-- Back to top button -->
-
-    <div class="layer"></div><!-- Opacity Mask Menu Mobile -->
-
-    <!-- COMMON SCRIPTS -->
-    <script src="{{ asset('assets-home/js/common_scripts.min.js') }}"></script>
+    <div id="toTop"></div><div class="layer"></div><script src="{{ asset('assets-home/js/common_scripts.min.js') }}"></script>
     <script src="{{ asset('assets-home/js/common_func.js') }}"></script>
     <script src="{{ asset('assets-home/assets/validate.js') }}"></script>
 
