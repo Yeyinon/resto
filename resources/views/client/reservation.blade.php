@@ -30,7 +30,7 @@
                                 <p>{{ $restaurant->description }}</p>
                             </div>
                             <div class="restaurant-actions">
-                                <a href="https://www.google.com/maps/search/{{ urlencode($restaurant->location) }}" target="_blank" class="btn-primary-custom">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($restaurant->location) }}" target="_blank" class="btn-primary-custom">
                                     <i class="fas fa-directions"></i> Itinéraire
                                 </a>
                             </div>
@@ -240,7 +240,8 @@
 
                                 <div class="form-group">
                                     <label><i class="fas fa-users"></i> Table</label>
-                                    <div class="table-options" id="table-options">
+                                    {{-- Le conteneur pour la nouvelle grille de tables --}}
+                                    <div id="table-options-container">
                                         <p class="select-date-time-message">Veuillez d'abord sélectionner une date et une heure</p>
                                     </div>
                                 </div>
@@ -366,6 +367,7 @@
 
         .star-rating {
             display: flex;
+            flex-direction: row-reverse; /* Pour que le :hover fonctionne correctement */
             gap: 5px;
         }
 
@@ -380,13 +382,9 @@
             transition: color 0.2s ease;
         }
 
+        .star-rating input[type="radio"]:checked ~ label,
         .star-rating label:hover,
-        .star-rating label.hover {
-            color: #ffd700;
-        }
-
-        .star-rating input[type="radio"]:checked + label,
-        .star-rating label.active {
+        .star-rating label:hover ~ label {
             color: #ffd700;
         }
 
@@ -488,7 +486,6 @@
 
         .time-slots {
             margin: 15px 0;
-            /* Added some bottom margin for spacing between categories */
             margin-bottom: 30px;
         }
 
@@ -499,7 +496,7 @@
         .time-category h5 {
             margin-bottom: 10px;
             color: var(--text-dark);
-            border-bottom: 1px solid #eee; /* Added a subtle separator */
+            border-bottom: 1px solid #eee;
             padding-bottom: 5px;
             font-size: 1.1em;
         }
@@ -526,100 +523,17 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 0.95rem; /* Slightly adjust font size for compactness */
+            font-size: 0.95rem;
         }
 
         .time-option input[type="radio"]:checked + label {
             background-color: var(--primary-color);
             color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow on selected */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .time-option label:hover {
             background-color: #e0e0e0;
-        }
-
-        .table-options {
-            margin: 15px 0;
-            max-height: 250px;
-            overflow-y: auto;
-            padding-right: 10px; /* For scrollbar spacing */
-        }
-
-        .table-option {
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            border: 1px solid #e0e0e0; /* Subtle border */
-        }
-
-        .table-option.available {
-            background-color: #d1fae5;
-            border: 1px solid #10b981;
-        }
-
-        .table-option.reserved {
-            background-color: #fee2e2;
-            border: 1px solid #ef4444;
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .table-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-
-        .table-option input[type="radio"]:checked + label {
-            box-shadow: 0 0 0 2px var(--primary-color);
-        }
-        .table-option label { /* Ensure the label itself fills the table-option for better click area */
-            display: block;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        .table-option-content { /* To ensure content is visible */
-            position: relative;
-            z-index: 1;
-        }
-
-        .table-option-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .table-status {
-            font-size: 0.9em;
-        }
-        .table-option.available .table-status {
-            color: #10b981;
-        }
-        .table-option.reserved .table-status {
-            color: #ef4444;
-        }
-
-
-        .table-option-location {
-            color: #777;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        .select-date-time-message {
-            text-align: center;
-            color: #777;
-            padding: 20px 0;
         }
 
         .reservation-info {
@@ -637,7 +551,7 @@
             align-items: center;
             gap: 15px;
             padding: 15px;
-            background-color: #f0fbf8; /* A very light green background */
+            background-color: #f0fbf8;
             border-radius: 8px;
             border: 1px solid #c7f2e1;
         }
@@ -656,26 +570,26 @@
             width: 100%;
             height: 150px;
             object-fit: cover;
-            border-radius: 8px; /* Slightly more rounded corners for images */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow on menu images */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .menu-item-name {
             font-size: 1.1em;
             color: #333;
-            font-weight: 600; /* Make menu item names a bit bolder */
+            font-weight: 600;
         }
         .menu-category h4 {
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 10px;
             margin-bottom: 20px;
-            color: var(--primary-dark); /* Use a darker primary color for section titles */
+            color: var(--primary-dark);
             font-size: 1.4em;
         }
         .content-card {
             background-color: #fff;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Stronger, softer shadow for content cards */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 20px;
         }
         h2, h3 {
@@ -703,143 +617,114 @@
         }
 
         /* Nouveaux styles pour la grille des tables */
-    .table-options-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* 2 ou 3 colonnes selon la taille de l'écran */
-        gap: 15px; /* Espacement entre les cartes de table */
-        margin-top: 15px;
-        max-height: 350px; /* Limite la hauteur et ajoute une scrollbar si nécessaire */
-        overflow-y: auto;
-        padding-right: 10px; /* Espace pour la scrollbar */
-        padding-bottom: 5px; /* Pour éviter que le contenu ne soit coupé par la scrollbar */
-    }
+        .table-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* 2 ou 3 colonnes */
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 5px;
+        }
 
-    .table-item {
-        background-color: #f8f9fa; /* Fond léger */
-        border: 1px solid #e0e0e0;
-        border-radius: 10px; /* Bords plus arrondis */
-        padding: 15px;
-        text-align: center;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        position: relative; /* Pour positionner le radio input */
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Ombre légère */
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 120px; /* Hauteur minimale pour chaque carte */
-    }
+        .table-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+        }
 
-    .table-item input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none; /* Rendre le radio invisible et non cliquable directement */
-    }
+        .table-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
 
-    .table-item label {
-        display: block;
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1; /* Pour que le label soit cliquable sur toute la carte */
-    }
+        .table-item.available:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
+            border-color: var(--primary-color);
+        }
 
-    .table-item.available {
-        border-color: #a7f3d0; /* Vert clair pour disponible */
-        background-color: #ecfdf5; /* Fond très léger pour disponible */
-    }
+        .table-item.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light), 0 6px 15px rgba(16, 185, 129, 0.3);
+            background-color: #d1fae5;
+            transform: translateY(-3px);
+        }
 
-    .table-item.available:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2); /* Ombre plus prononcée au survol */
-        border-color: var(--primary-color);
-    }
+        .table-item.reserved {
+            border-color: #fca5a5;
+            background-color: #fef2f2;
+            opacity: 0.7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
-    .table-item.selected {
-        border-color: var(--primary-color); /* Couleur primaire pour la sélection */
-        box-shadow: 0 0 0 3px var(--primary-light), 0 6px 15px rgba(16, 185, 129, 0.3); /* Anneau de sélection et ombre */
-        background-color: #d1fae5; /* Fond un peu plus vert pour la sélection */
-    }
+        .table-item-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #6b7280;
+        }
 
-    .table-item.reserved {
-        border-color: #fca5a5; /* Rouge clair pour réservé */
-        background-color: #fef2f2; /* Fond très léger pour réservé */
-        opacity: 0.7;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
+        .table-item.available .table-item-icon {
+            color: var(--primary-dark);
+        }
+        .table-item.selected .table-item-icon {
+            color: var(--primary-dark);
+        }
+        .table-item.reserved .table-item-icon {
+            color: #dc2626;
+        }
 
-    .table-item-icon {
-        font-size: 2.2rem; /* Plus grande icône */
-        margin-bottom: 10px;
-        color: #6b7280; /* Couleur neutre pour l'icône par défaut */
-    }
+        .table-item-capacity {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
 
-    .table-item.available .table-item-icon {
-        color: var(--primary-dark); /* Vert foncé pour icône disponible */
-    }
-    .table-item.selected .table-item-icon {
-        color: var(--primary-dark); /* Même couleur pour l'icône sélectionnée */
-    }
+        .table-item-location {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
 
-    .table-item.reserved .table-item-icon {
-        color: #dc2626; /* Rouge pour icône réservée */
-    }
+        .table-item-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 15px;
+            margin-top: 8px;
+        }
 
-    .table-item-capacity {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 5px;
-    }
+        .table-item.available .table-item-status {
+            color: #059669;
+            background-color: #d1fae5;
+        }
 
-    .table-item-location {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 10px;
-    }
+        .table-item.reserved .table-item-status {
+            color: #b91c1c;
+            background-color: #fee2e2;
+        }
 
-    .table-item-status {
-        font-size: 0.9rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 5px 10px;
-        border-radius: 5px;
-        margin-top: auto; /* Pousse le statut vers le bas */
-    }
-
-    .table-item.available .table-item-status {
-        color: #059669; /* Vert foncé pour le texte disponible */
-        background-color: #d1fae5; /* Vert très clair pour le fond */
-    }
-
-    .table-item.reserved .table-item-status {
-        color: #b91c1c; /* Rouge foncé pour le texte réservé */
-        background-color: #fee2e2; /* Rouge très clair pour le fond */
-    }
-
-    /* Message en l'absence de tables ou avant sélection */
-    .select-date-time-message {
-        text-align: center;
-        color: #777;
-        padding: 20px;
-        background-color: #f0f0f0;
-        border-radius: 8px;
-        margin-top: 15px;
-    }
-
-    /* Styles pour la radio button list d'origine, à supprimer ou surcharger */
-    /* Assurez-vous que ces styles ne se chevauchent pas avec les nouveaux */
-    .table-option { /* Cet ancien style doit être neutralisé ou supprimé */
-        /* display: none; si vous voulez les masquer complètement */
-        /* Ou, assurez-vous que vos nouveaux styles prennent le dessus */
-    }
+        .select-date-time-message {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
 
     </style>
 
@@ -847,7 +732,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const dateInput = document.getElementById('reservation_date');
         const timeInputs = document.querySelectorAll('input[name="reservation_time"]');
-        const tableOptionsContainer = document.getElementById('table-options');
+        const tableOptionsContainer = document.getElementById('table-options-container'); // Conteneur mis à jour
         const reservationForm = document.getElementById('reservationForm');
         const commentFormContainer = document.getElementById('comment-form-container');
 
@@ -881,40 +766,29 @@
                 <form action="{{ route('comments.store') }}" method="POST" id="commentForm">
                     @csrf
                     <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
-
                     <div class="form-group">
                         <label for="rating">Votre note *</label>
                         <div class="rating-input">
                             <div class="star-rating" id="star-rating">
-                                <input type="radio" id="star5" name="rating" value="5" required>
-                                <label for="star5" data-value="5">★</label>
-                                <input type="radio" id="star4" name="rating" value="4">
-                                <label for="star4" data-value="4">★</label>
-                                <input type="radio" id="star3" name="rating" value="3">
-                                <label for="star3" data-value="3">★</label>
-                                <input type="radio" id="star2" name="rating" value="2">
-                                <label for="star2" data-value="2">★</label>
-                                <input type="radio" id="star1" name="rating" value="1">
-                                <label for="star1" data-value="1">★</label>
+                                <input type="radio" id="star5" name="rating" value="5" required><label for="star5" title="Excellent">★</label>
+                                <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="Très bien">★</label>
+                                <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="Correct">★</label>
+                                <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="Décevant">★</label>
+                                <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="Très décevant">★</label>
                             </div>
-                            <span id="rating-text">Cliquez pour noter</span>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="content">Votre avis *</label>
                         <textarea name="content" id="content" required class="form-control" rows="4"
                             placeholder="Partagez votre expérience pour aider les autres utilisateurs" maxlength="1000"></textarea>
                         <small class="form-text text-muted">Maximum 1000 caractères</small>
                     </div>
-
                     <button type="submit" class="btn-primary-custom">
                         <i class="fas fa-paper-plane"></i> Publier mon avis
                     </button>
                 </form>
             `;
-
-            // Initialiser le système d'étoiles
             initStarRating();
         }
 
@@ -928,88 +802,20 @@
         }
 
         function initStarRating() {
-            const starRating = document.getElementById('star-rating');
-            const ratingText = document.getElementById('rating-text');
-            const stars = starRating.querySelectorAll('label');
-            const radioButtons = starRating.querySelectorAll('input[type="radio"]');
-
-            // Messages pour chaque note
-            const ratingMessages = {
-                1: "Très décevant",
-                2: "Décevant",
-                3: "Correct",
-                4: "Très bien",
-                5: "Excellent"
-            };
-
-            stars.forEach((star, index) => {
-                // Survol des étoiles
-                star.addEventListener('mouseenter', function() {
-                    const value = this.getAttribute('data-value');
-                    highlightStars(value);
-                    ratingText.textContent = ratingMessages[value];
-                });
-
-                // Clic sur les étoiles
-                star.addEventListener('click', function() {
-                    const value = this.getAttribute('data-value');
-                    radioButtons[5 - value].checked = true;
-                    ratingText.textContent = ratingMessages[value];
-                    ratingText.style.fontWeight = 'bold';
-                    ratingText.style.color = '#ffd700';
-                });
-            });
-
-            // Réinitialiser au survol de sortie
-            starRating.addEventListener('mouseleave', function() {
-                const checkedStar = starRating.querySelector('input[type="radio"]:checked');
-                if (checkedStar) {
-                    const value = checkedStar.value;
-                    highlightStars(value);
-                    ratingText.textContent = ratingMessages[value];
-                } else {
-                    resetStars();
-                    ratingText.textContent = "Cliquez pour noter";
-                    ratingText.style.fontWeight = 'normal';
-                    ratingText.style.color = '#777';
-                }
-            });
-
-            function highlightStars(rating) {
-                stars.forEach((star, index) => {
-                    const starValue = star.getAttribute('data-value');
-                    if (starValue <= rating) {
-                        star.style.color = '#ffd700';
-                    } else {
-                        star.style.color = '#ddd';
-                    }
-                });
-            }
-
-            function resetStars() {
-                stars.forEach(star => {
-                    star.style.color = '#ddd';
-                });
-            }
+            // Logique pour le rating par étoiles
         }
 
-        // Fonction pour mettre à jour les tables disponibles
+        // --- NOUVELLE FONCTION AMÉLIORÉE POUR AFFICHER LES TABLES ---
         function updateAvailableTables() {
             const selectedDate = dateInput.value;
-            let selectedTime = null;
+            const selectedTimeInput = document.querySelector('input[name="reservation_time"]:checked');
 
-            for (const timeInput of timeInputs) {
-                if (timeInput.checked) {
-                    selectedTime = timeInput.value;
-                    break;
-                }
-            }
-
-            if (!selectedDate || !selectedTime) {
+            if (!selectedDate || !selectedTimeInput) {
                 tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Veuillez d\'abord sélectionner une date et une heure</p>';
                 return;
             }
 
+            const selectedTime = selectedTimeInput.value;
             tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Chargement des tables disponibles...</p>';
 
             fetch(`/api/available-tables?restaurant_id={{ $restaurant->id }}&date=${selectedDate}&time=${selectedTime}`, {
@@ -1018,103 +824,78 @@
                     'Accept': 'application/json',
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur réseau: ' + response.status);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                tableOptionsContainer.innerHTML = '';
-
                 const availableTables = data.tables || [];
                 const reservedTableIds = data.reservées || [];
 
                 if (availableTables.length === 0) {
-                    tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure</p>';
+                    tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Aucune table disponible à cette date et heure.</p>';
                     return;
                 }
 
-                const tablesByCapacity = {};
+                tableOptionsContainer.innerHTML = ''; // Vider le conteneur
+                const grid = document.createElement('div');
+                grid.className = 'table-options-grid';
+
                 availableTables.forEach(table => {
-                    const capacity = table.guest_number || table.capacity || 1;
-                    if (!tablesByCapacity[capacity]) {
-                        tablesByCapacity[capacity] = [];
+                    const isReserved = reservedTableIds.includes(table.id);
+                    const guestNumber = table.guest_number || table.capacity || 1;
+                    const location = table.location || 'Intérieur';
+                    
+                    const tableCard = document.createElement('div');
+                    tableCard.className = `table-item ${isReserved ? 'reserved' : 'available'}`;
+                    tableCard.setAttribute('data-table-id', table.id);
+
+                    let cardContent = `
+                        <i class="fas fa-chair table-item-icon"></i>
+                        <div class="table-item-capacity">${guestNumber} place${guestNumber > 1 ? 's' : ''}</div>
+                        <div class="table-item-location">${location}</div>
+                    `;
+
+                    if (isReserved) {
+                        cardContent += `<div class="table-item-status">Réservée</div>`;
+                    } else {
+                        cardContent += `<div class="table-item-status">Disponible</div>
+                                      <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}" required>`;
                     }
-                    tablesByCapacity[capacity].push(table);
-                });
+                    
+                    tableCard.innerHTML = cardContent;
 
-                Object.keys(tablesByCapacity).sort((a, b) => a - b).forEach(capacity => {
-                    const tables = tablesByCapacity[capacity];
-
-                    tables.forEach(table => {
-                        const isReserved = reservedTableIds.includes(table.id);
-                        const tableDiv = document.createElement('div');
-                        tableDiv.className = `table-option ${isReserved ? 'reserved' : 'available'}`;
-
-                        const guestNumber = table.guest_number || table.capacity || 1;
-                        const location = table.location || 'Emplacement non spécifié';
-
-                        if (isReserved) {
-                            tableDiv.innerHTML = `
-                                <div class="table-option-content">
-                                    <div class="table-option-details">
-                                        <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
-                                        <span class="table-status">
-                                            <i class="fas fa-times-circle"></i> Réservée
-                                        </span>
-                                    </div>
-                                    <div class="table-option-location">
-                                        <i class="fas fa-map-marker-alt"></i> ${location}
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            tableDiv.innerHTML = `
-                                <input type="radio" id="table_${table.id}" name="table_id" value="${table.id}" required>
-                                <label for="table_${table.id}" class="table-label">
-                                    <div class="table-option-content">
-                                        <div class="table-option-details">
-                                            <strong>${guestNumber} personne${guestNumber > 1 ? 's' : ''}</strong>
-                                            <span class="table-status">
-                                                <i class="fas fa-check-circle"></i> Disponible
-                                            </span>
-                                        </div>
-                                        <div class="table-option-location">
-                                            <i class="fas fa-map-marker-alt"></i> ${location}
-                                        </div>
-                                    </div>
-                                </label>
-                            `;
-
-                            tableDiv.addEventListener('click', function() {
-                                const radio = this.querySelector('input[type="radio"]');
-                                if (radio) {
-                                    radio.checked = true;
-                                    document.querySelectorAll('.table-option.available').forEach(el => {
-                                        el.style.boxShadow = 'none';
-                                    });
-                                    this.style.boxShadow = '0 0 0 2px var(--primary-color)';
-                                }
+                    if (!isReserved) {
+                        tableCard.addEventListener('click', function() {
+                            // Désélectionner les autres cartes
+                            document.querySelectorAll('.table-item.selected').forEach(card => {
+                                card.classList.remove('selected');
                             });
-                        }
-
-                        tableOptionsContainer.appendChild(tableDiv);
-                    });
+                            
+                            // Sélectionner la carte cliquée
+                            this.classList.add('selected');
+                            
+                            // Cocher le bouton radio correspondant
+                            const radio = this.querySelector('input[type="radio"]');
+                            if(radio) radio.checked = true;
+                        });
+                    }
+                    
+                    grid.appendChild(tableCard);
                 });
+
+                tableOptionsContainer.appendChild(grid);
 
                 // Sélectionner automatiquement la première table disponible
-                const firstAvailableRadio = tableOptionsContainer.querySelector('input[type="radio"]');
-                if (firstAvailableRadio) {
-                    firstAvailableRadio.checked = true;
-                    firstAvailableRadio.closest('.table-option').style.boxShadow = '0 0 0 2px var(--primary-color)';
+                const firstAvailableCard = grid.querySelector('.table-item.available');
+                if (firstAvailableCard) {
+                    firstAvailableCard.click();
                 }
+
             })
             .catch(error => {
                 console.error("Erreur lors de la récupération des tables :", error);
                 tableOptionsContainer.innerHTML = '<p class="select-date-time-message">Erreur lors du chargement des tables. Veuillez réessayer.</p>';
             });
         }
+
         // Événements pour la réservation
         dateInput.addEventListener('change', updateAvailableTables);
         timeInputs.forEach(input => {
@@ -1124,24 +905,20 @@
         // Validation du formulaire de réservation
         reservationForm.addEventListener('submit', function(event) {
             const selectedTable = document.querySelector('input[name="table_id"]:checked');
-            const selectedDate = dateInput.value;
-            let selectedTime = null;
-
-            for (const timeInput of timeInputs) {
-                if (timeInput.checked) {
-                    selectedTime = timeInput.value;
-                    break;
-                }
-            }
-
-            if (!selectedDate || !selectedTime || !selectedTable) {
+            if (!selectedTable) {
                 event.preventDefault();
-                alert('Veuillez sélectionner une date, une heure et une table pour effectuer votre réservation.');
+                // Afficher un message plus élégant qu'une alerte si possible
+                const tableErrorMsg = document.createElement('p');
+                tableErrorMsg.textContent = 'Veuillez sélectionner une table disponible.';
+                tableErrorMsg.style.color = 'red';
+                tableErrorMsg.style.textAlign = 'center';
+                tableOptionsContainer.appendChild(tableErrorMsg);
+                setTimeout(() => tableErrorMsg.remove(), 3000);
                 return;
             }
         });
 
-        console.log("Script de réservation chargé avec système de commentaires");
+        console.log("Script de réservation chargé avec système de commentaires et design de table amélioré.");
     });
     </script>
 @endsection
