@@ -1,7 +1,7 @@
 @extends('master')
 @section('guest')
     <title>Resto - Inscription client</title>
-    
+
     <style>
         /* Variables pour les couleurs */
         :root {
@@ -161,11 +161,12 @@
 
         .form-control {
             height: 50px;
-            padding: 10px 20px 10px 50px;
+            padding: 10px 20px 10px 50px; /* Adjusted padding for icon */
             font-size: 16px;
             border: 2px solid #e9ecef;
             border-radius: 10px;
             transition: all 0.3s ease;
+            width: 100%; /* Ensure full width */
         }
 
         .form-control:focus {
@@ -177,7 +178,8 @@
         .form-group i {
             position: absolute;
             left: 16px;
-            top: 16px;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for vertical centering */
             font-size: 18px;
             color: var(--primary-color);
             z-index: 2;
@@ -249,13 +251,9 @@
 
         /* Animation d'icône */
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .form-group i {
-            transition: all 0.3s ease;
+            0% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.05); }
+            100% { transform: translateY(-50%) scale(1); }
         }
 
         .form-control:focus + i {
@@ -264,7 +262,6 @@
         }
     </style>
 
-    <!-- Page Title Section -->
     <div class="register-section pattern-bg">
         <div class="container">
             <div class="row justify-content-center">
@@ -287,22 +284,37 @@
                             <form method="post" action="{{ route('client.register.create') }}">
                                 @csrf
                                 <h6 class="form-section-title">Détails personnels</h6>
-                                
+
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Nom complet *" name="name" type="text" required>
+                                    <input class="form-control" placeholder="Nom complet *" name="name" type="text" value="{{ old('name') }}" required>
                                     <i class="fas fa-user"></i>
                                 </div>
-                                
+
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Adresse email *" name="email" type="email" required>
+                                    <input class="form-control" placeholder="Adresse email *" name="email" type="email" value="{{ old('email') }}" required>
                                     <i class="fas fa-envelope"></i>
                                 </div>
-                                
+
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Téléphone (ex: 01 97 00 00 00) *" name="phone" type="tel" value="{{ old('phone') }}">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Adresse complète *" name="address" type="text" value="{{ old('address') }}" required>
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+
                                 <div class="form-group">
                                     <input class="form-control" placeholder="Mot de passe *" name="password" type="password" required>
                                     <i class="fas fa-lock"></i>
                                 </div>
-                                
+
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Confirmer le mot de passe *" name="password_confirmation" type="password" required>
+                                    <i class="fas fa-lock"></i>
+                                </div>
+
                                 <div class="login-link">
                                     Vous avez déjà un compte ? <a href="{{ route('client_login_form') }}">Connexion</a>
                                 </div>

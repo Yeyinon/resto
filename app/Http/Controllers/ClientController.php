@@ -24,7 +24,7 @@ class ClientController extends Controller
     {
         return view('client.login');
     }
-    
+
     public function book(Request $request)
     {
         $restaurant = Restaurant::find($request->id);
@@ -32,10 +32,10 @@ class ClientController extends Controller
             $query->where('restaurant_id', $restaurant->id);
         })->count();
         $comments = $restaurant->comments;
-        
+
         // Charger les menus avec les plats pour les afficher
         $menus = $restaurant->menus()->with('plats')->get();
-        
+
         return view('client.reservation', [
             'restaurant' => $restaurant,
             'menus' => $menus
@@ -59,7 +59,7 @@ class ClientController extends Controller
             \Log::debug('Données de réservation reçues:', $request->all());
             // dd($request->all()); // Vous pouvez décommenter temporairement pour voir les données
 
-             // Vérifier si l'utilisateur est connecté
+            // Vérifier si l'utilisateur est connecté
             if (!Auth::guard('client')->check()) {
                 return redirect()->route('client.login')->with('error', 'Vous devez être connecté pour effectuer une réservation.');
             }
@@ -163,26 +163,26 @@ class ClientController extends Controller
             'date' => 'required|date',
             'time' => 'required|string',
         ]);
-        
+
         $restaurantId = $request->restaurant_id;
         $date = $request->date;
         $time = $request->time;
-        
+
         // Récupérer toutes les tables du restaurant avec tous les champs nécessaires
         // Assurez-vous que 'capacity' est sélectionnée si vous l'utilisez comme fallback
         $tables = Table::where('restaurant_id', $restaurantId)
-                       ->select('id', 'number','guest_number', 'location', 'capacity') // Assurez-vous que 'capacity' est là si nécessaire
-                       ->get();
-        
+                         ->select('id', 'number','guest_number', 'location', 'capacity') // Assurez-vous que 'capacity' est là si nécessaire
+                         ->get();
+
         // Récupérer les tables déjà réservées à cette date et heure
         $reservedTableIds = Reservation::where('reservation_date', $date)
-                                      ->where('reservation_time', $time)
-                                      ->whereHas('table', function ($query) use ($restaurantId) {
-                                          $query->where('restaurant_id', $restaurantId);
-                                      })
-                                      ->pluck('table_id')
-                                      ->toArray();
-        
+                                     ->where('reservation_time', $time)
+                                     ->whereHas('table', function ($query) use ($restaurantId) {
+                                         $query->where('restaurant_id', $restaurantId);
+                                     })
+                                     ->pluck('table_id')
+                                     ->toArray();
+
         // Préparer les données de réponse avec tous les champs nécessaires
         $tableData = [];
         foreach ($tables as $table) {
@@ -194,7 +194,7 @@ class ClientController extends Controller
                 'is_available' => !in_array($table->id, $reservedTableIds)
             ];
         }
-        
+
         return response()->json([
             'tables' => $tableData,
             'reservées' => $reservedTableIds
@@ -212,13 +212,13 @@ class ClientController extends Controller
         $restaurants = Restaurant::all();
         return view('client.index', compact("restaurants"));
     }
-    
+
     public function profile()
     {
         $client = Auth::guard('client')->user();
         return view('client.profile', compact('client'));
     }
-    
+
     public function reservation()
     {
         $restaurants = restaurant::all();
@@ -238,7 +238,7 @@ class ClientController extends Controller
             return back();
         }
     }
-    
+
     public function register()
     {
         return view('client.register');
@@ -249,14 +249,21 @@ class ClientController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:clients,email',
-            'password' => 'required|string|min:6',
+            // Nouvelle règle pour le téléphone : requis, chaîne, format spécifique pour 8 chiffres
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'address' => 'required|string|max:255', // Nouvelle règle pour l'adresse
+            'password' => 'required|string|min:6|confirmed', // Ajout de 'confirmed' pour la confirmation du mot de passe
         ], [
             'name.required' => 'Le nom est requis.',
             'email.required' => 'L\'adresse email est requise.',
             'email.email' => 'L\'adresse email doit être valide.',
             'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'phone.required' => 'Le numéro de téléphone est requis.',
+            'phone.regex' => 'Le numéro de téléphone doit être composé de 10 chiffres (ex: 97000000).', // Message d'erreur spécifique
+            'address.required' => 'L\'adresse est requise.',
             'password.required' => 'Le mot de passe est requis.',
             'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
 
         if ($validator->fails()) {
@@ -268,6 +275,8 @@ class ClientController extends Controller
         $client = Client::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone, // Ajout du champ téléphone
+            'address' => $request->address, // Ajout du champ adresse
             'password' => Hash::make($request->password),
             'created_at' => Carbon::now(),
         ]);
@@ -286,7 +295,7 @@ class ClientController extends Controller
         toastr()->success('Données enregistrées avec succès');
         return redirect()->back();
     }
-    
+
     public function destroy(Request $request)
     {
         $client = Client::findOrFail($request->id);
@@ -294,7 +303,7 @@ class ClientController extends Controller
         toastr()->error('Le client a été bien supprimé !', " ");
         return redirect()->route("Admin.clients");
     }
-    
+
     public function logout()
     {
         Auth::guard('client')->logout();
@@ -359,7 +368,8 @@ class ClientController extends Controller
                 // S'assurer que l'email est unique sauf pour l'utilisateur actuel
                 Rule::unique('clients')->ignore($client->id),
             ],
-            'phone' => 'nullable|string|max:20', // Exemple: téléphone optionnel
+            // Validation mise à jour pour le téléphone (8 chiffres)
+            'phone' => ['nullable', 'string', 'regex:/^[0-9]{8}$/'],
             'address' => 'nullable|string|max:255', // Exemple: adresse optionnelle
             'current_password' => 'nullable|required_with:new_password|current_password:client', // 'current_password:client' vérifie le mot de passe actuel pour le guard 'client'
             'new_password' => 'nullable|min:8|confirmed', // 'confirmed' vérifie la correspondance avec new_password_confirmation
@@ -387,12 +397,12 @@ class ClientController extends Controller
         // Cela suppose que vous avez une relation `yumsTransactions` définie dans votre modèle Client.
         // Exemple : un modèle `YumTransaction` lié au client.
         // Si vous n'avez pas de table de transactions, vous pourriez simplement passer le solde.
-        
+
         // Exemple avec une relation `yumsTransactions` :
-        $yumsTransactions = $client->yumsTransactions()->latest()->get(); 
+        $yumsTransactions = $client->yumsTransactions()->latest()->get();
 
         // Si vous n'avez pas de table de transactions dédiée, vous pouvez passer une collection vide
-        // $yumsTransactions = collect(); 
+        // $yumsTransactions = collect();
 
         return view('client.yums_history', compact('client', 'yumsTransactions'));
     }
